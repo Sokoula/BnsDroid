@@ -32,7 +32,7 @@ global WIN_HEIGHT := 1080 + 30          ;視窗的高度 pixel (需補上標題�
 
 ;---副本難度設定---
 ;(覆寫 bns_DungeonDispater.ahk 預設值)
-global ACTIVITY := 0         ;當前活動副本(入門才會有)        
+global ACTIVITY := 0         ;當前活動副本(入門才會有)
 global PARTY_MODE := 1       ;組隊模式: 1:入門, 2:一般, 3:困難
 
 
@@ -155,13 +155,66 @@ onFinish(msg) {
 
 
 ;================================================================================================================
-;    Test 
+;    Test
 ;================================================================================================================
 singleStepTest() {
     ; testMode := 1
 
     if(testMode == 1)
     {
+
+        ; sleep 15000
+
+        ;///背景 滑鼠 點擊測試
+        ; SetControlDelay -1
+        ; ControlClick,,%res_game_window_title%,, Left,, NA X968 Y559   ;O  可移動, 但是沒有點擊
+        ; ControlClick,,%res_game_window_title%,, Left, 10, NA X968 Y559  ;O
+        ; ControlClick,,%res_game_window_title%,, Left, 10, NA x968 y559  ;O
+        ; ControlClick,,%res_game_window_title%,,     , 10, NA x968 y559  ;O
+        ; ControlClick, x968 y559 ,%res_game_window_title%,, ,, POS NA   ;O
+
+        ; ControlClick, x968 y559 ,%res_game_window_title%,, ,, POS NA d  ;X
+        ; ControlClick,,%res_game_window_title%,, LEFT,, NA x968 y559   ;O
+        ; ControlClick, x968 y559, %res_game_window_title%,, LEFT,, POS   ;X
+        ; ControlClick, x968 y559, %res_game_window_title%,, LEFT,, NA POS   ;O
+
+
+
+
+        ; ControlClick, 1 ,%res_game_window_title%,, Left, 10, NA x968 y559
+        ; ControlClick,,%res_game_window_title%, "", Left, 10, NA x968 y559
+        ; sleep 500
+
+
+
+        ; lParam := 800 & 0xFFFF | (560 & 0xFFFF) << 16
+        ; PostMessage, 0x200, 0, %lParam%, , %res_game_window_title% ;WM_MOUSEMOVE
+        ; sleep 500
+        ; PostMessage, 0x201,  , %lParam%, , %res_game_window_title% ;WM_LBUTTONDOWN
+        ; sleep 500
+        ; PostMessage, 0x202,  , %lParam%, , %res_game_window_title% ;WM_LBUTTONUP
+        ; sleep 500
+        ; ControlClick,, %res_game_window_title%,, Left,, NA  x968 y559   ;O
+
+        ; return 1
+
+        ; loop 10 {
+        ;     BnsActionSprintToPosition(-13236, 53598)   ;入口轉向點
+        ;     sleep 1000
+        ;     BnsActionAdjustDirection(50)
+        ;     sleep 3000
+        ;     BnsActionSprintToPosition(-14624, 52844)   ;入口轉向點
+        ;     sleep 1000
+        ;     BnsActionAdjustDirection(50)
+        ;     sleep 3000
+        ;     BnsActionSprintToPosition(-13274, 52050)   ;入口轉向點
+        ;     sleep 1000
+        ;     BnsActionAdjustDirection(50)
+        ;     sleep 3000
+
+        ; }
+
+        ; return 1
 
         ; ShowTip("Searching...")aw
         ; FindPixelRGB(1920,1080,0,0, 0x45291F, 5)
@@ -183,6 +236,17 @@ singleStepTest() {
         ; droid := new BnsDroidShroudedAjanara()
         ; droid.brokeShield()
 
+        ; droid := new BnsDroidSuspiciousSkyIsland()
+
+
+        ; droid := new BnsDroidGhostVillage()
+        ; droid.dungeonNavigation()
+        ; droid.start()
+        ; droid.finish()
+        ; return 1
+
+
+
         ; BnsPcSendPartyInvite("芙莉雅丶康奈埃", 3)
 
         ; droid := new BnsDroidFourInOne()
@@ -190,8 +254,6 @@ singleStepTest() {
         ; droid.start()
         ; droid.leaveTeam(1)
 
-
-        
         ; droid := new BnsDroidChaosYetiCave()
         ; droid.actionGoToFinalRoom()
         ; droid.moveToBossRoom(2)
@@ -209,7 +271,7 @@ singleStepTest() {
 
         ; BnsActionAdjustDirection(90)
 
-        ; ControlSend,,{w down}, %res_game_window_title% 
+        ; ControlSend,,{w down}, %res_game_window_title%
         ; memHack := GetMemoryHack()
 
 ;=================================== 魷魚遊戲
@@ -217,7 +279,7 @@ singleStepTest() {
         ; ground := 39916 ;BnsGetPosZ()
         ; target := 25760
 
-        
+
         ; ; loop {
         ; ;     x := BnsGetPosX()
         ; ;     y := BnsGetPosY()
@@ -234,7 +296,7 @@ singleStepTest() {
         ; ;     }
         ; ;     sleep 100
         ; ; }
-        
+
 
         ; loop {
         ;     ; if(BnsGetPosZ() > -8666 && (BnsGetPosZ() - ground > 50) && jump == 0) {
@@ -255,7 +317,7 @@ singleStepTest() {
         ;             if(dst > 100 ) {
         ;                 target := -7280
         ;             }
-                    
+
 
         ;             ShowTip("●[巡航中] 剩餘航程 " dst "%")
         ;             if(abs(dst) > 5 && abs(dst) < 15) {
@@ -287,7 +349,8 @@ singleStepTest() {
             memHack := GetMemoryHack()
             ; ShowTip("form: " memHack.getFormPosX())
 
-            ; ShowTip(memHack.funcCheck(), 40, 50)
+            ShowTip(memHack.funcCheck(), 40, 50)
+            ; ShowTip(memHack.getF8RoomNumber(), 40, 50)
             ; ShowTip("blood: " memHack.getMainTargetBlood() "`n過圖中: " ((memHack.getMainTargetBlood() == "" || memHack.getMainTargetBlood() == 0) ? 1 : 0))
 
             ; ShowTip("Bidding count: " BnsIsBidding())
@@ -296,10 +359,11 @@ singleStepTest() {
 
             ; ShowTip("name: " memHack.getName())
             ; ShowTip("distance: " BnsMeansureTargetDistDegree( -15712, 57864)[1] ", " BnsGetPosX() ", " BnsGetPosY() ", " BnsGetPosZ())
-            ShowTipD("isAutoCombat: " memHack.getAutoCombatState())
+            ; ShowTipD("isNpcTalking: " BnsIsNpcTalking() ", " BnsIsMapLoading())
+            ; ShowTipD("isAutoCombat: " memHack.getAutoCombatState())
             ; ShowTip(memHack.infoDump(1))
             ; ShowTipD(memHack.infoDump(2))
-            ; ShowTipD("isDead: " (memHack.getPosture() == 1))+rt   qwert   qwert   qpuy[iopuy[iopuy[789]\            ; ShowTipD("Posture: " memHack.getPosture())
+            ; ShowTipD("isDead: " (memHack.getPosture() == 1)); ShowTipD("Posture: " memHack.getPosture())
             ; ShowTipD("isBattle: " memHack.isInBattling() ", isLeaveBattle: " BnsIsLeaveBattle())
             ; ShowTipD("Target: " memHack.getMainTargetName())
             ; ShowTipD("isDead: " BnsIsCharacterDead() ", posture: " GetMemoryHack().getPosture())
@@ -314,7 +378,7 @@ singleStepTest() {
             dsleep(200)
         }
 
-;=================================== 領符 
+;=================================== 領符
         ; loop {
         ;     MouseClick left, 576, 265
         ;     sleep 1000
@@ -327,7 +391,7 @@ singleStepTest() {
         ; return 1
 
 ;=================================== 找基址一個一個點
-       
+
         ; loop {
         ;     send {down}
         ;     sleep 30
@@ -345,24 +409,24 @@ singleStepTest() {
         ; scroll := "5,500;3,500;3,1000;4,500;2,500;2,1000;1,500;2,500;3,500;4,500;5,500;5,500;5,500;"
         ; scroll := "1,500;2,500;3,500;4,500;5,500;6,500;7,200;r,300;1,500;2,500;3,500;4,500;5,500;6,500;7,200;r,300;1,500;"+789    \        ; scroll := "6,300;2,300;2,300;6,300;5,600;4,250;3,900;; 1,300;1,300;1,600;1,300;L,300;6,250;R,250;2,600;;2,300;3,300;4,300;4,300;4,300;2,300;1,300;2,200;L,250;5,250;R,300;1,350;L,250;6,300"
         ; scroll := "2,300;3,300;4,300;4,300;4,300;2,300;1,300;2,200;L,250;5,250;R,300;1,350;L,250;6,300"
-        
+
         ; ; 萬里の長城
         ; scroll := "2,300;4,300;5,600;6,600;2,600;1,600;2,600;0,600;;2,300;4,300;5,600;6,600;5,200;R,400;1,200;L,400;6,600;0,600;;2,300;4,300;5,600;6,600;2,600;1,600;2,600;0,800;;L,400;6,200;R,300;1,600;2,600;4,600;3,200;4,200;3,300;2,300;1,600;2,600"
-        
+
         ; scroll := RegExReplace(scroll, "5,", "z,")
         ; scroll := RegExReplace(scroll, "6,", "x,")
         ; scroll := RegExReplace(scroll, "7,", "c,")
         ; scroll := RegExReplace(scroll, "L,", "LButton,")
         ; scroll := RegExReplace(scroll, "R,", "RButton,")
-    
-    
+
+
         ; ShowTipD( scroll )
-        
+
         ; nodes := StrSplit(scroll, ";", "`r`n")
-        
+
         ; loop 100 {+789]\        ;     node := StrSplit(nodes[A_index], ",", "`r`n")wert   qwert   qwertiopuy[iopuy[iopu+7899]\
         ;     ShowTipD(A_ndex " node=" node[1] ", t=" node[2])
-            
+
         ;     key := node[1]
 
         ;     if( key == "RButton" ) {
@@ -397,7 +461,7 @@ singleStepTest() {
 
 ;================================================================================================================
 ;================================================================================================================
-;    Main 
+;    Main
 ;================================================================================================================
 main() {
     onStart()
@@ -431,11 +495,11 @@ main() {
     loop
     {
         DumpLogI("[Script] Start Next Round -------------------------------------")
-        
+
         if(EngageDungeon() == 0) {
             break
         }
-        
+
         sleep 3000
     }
 

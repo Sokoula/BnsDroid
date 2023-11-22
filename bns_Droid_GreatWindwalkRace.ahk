@@ -10,10 +10,10 @@ Class BnsDroidGreatWindwalkRace {
     __new() {
         RACE_FORM_SX := 525
         RACE_FORM_SY := 380
-    
+
         RACE_FORM_EX := 1630
         RACE_FORM_EY := 765
-    
+
 
 
         this.RACE_FORM_POS_Y := RACE_FORM_SY + ((RACE_FORM_EY - RACE_FORM_SY) // 2)
@@ -46,7 +46,7 @@ Class BnsDroidGreatWindwalkRace {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 廣場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
 
         ;ESC 選單 -> 天下第一輕功大會
@@ -75,7 +75,7 @@ Class BnsDroidGreatWindwalkRace {
 
             case 21:
                 MouseClick, left, this.RACE_FORM_POS_X[5], this.RACE_FORM_POS_Y
-            
+
             Default:
                 return 0
         }
@@ -175,14 +175,14 @@ Class BnsDroidGreatWindwalkRace {
         BnsActionSprintToPosition(13584, -11740, 0x2)   ;開始平台最邊緣
 
         BnsStopHackSpeed()
-        
+
 
         ;3.起始平台尾瑞 - 過河起跳石頂 ------------------------------------------------------------
         BnsActionSprintToPosition(13450, -7260, 0x4, 500)   ;離開起始平台 500ms , 目標起跳石底
         dsleep(30)
         ControlSend,,{Space}, %res_game_window_title%   ;滑翔
         dsleep(30)
-        
+
         BnsStartHackSpeed()
         BnsActionSprintToPosition(13450, -7260,,500)   ;目標起跳石底, 仙速輕功飛行 500ms 以驗證是否有成功進滑翔
         dsleep(300)
@@ -254,7 +254,7 @@ Class BnsDroidGreatWindwalkRace {
             ControlSend,,{Space}, %res_game_window_title%   ;脫離浮石
             dsleep(500)
             ControlSend,,{Space}, %res_game_window_title%   ;輕功滑翔
-            
+
             BnsStartHackSpeed()
             if(!BnsActionSprintToPosition(7695, 1355, 0x4, 5000)) {      ;降落到鎖鍊二頭
                 continue
@@ -288,7 +288,7 @@ Class BnsDroidGreatWindwalkRace {
         return 0
     }
 
- 
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 第四階段: 陷阱山坡區
     ;------------------------------------------------------------------------------------------------------------
@@ -350,7 +350,7 @@ Class BnsDroidGreatWindwalkRace {
             BnsActionSprintToPosition(-7325, 1266,, 10000)         ;雪球坡道頂
             dsleep(100)
             ; BnsActionSprintToPosition(-7440, 440,, 5000)         ;左側補給小平台上
-            
+
             BnsActionSprintToPosition(-7436, 770,, 5000)           ;左側補給小平台右側
             BnsActionSprintToPosition(-7400, 390,, 5000)           ;左側補給小平台上
 

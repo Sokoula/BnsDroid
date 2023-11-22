@@ -66,7 +66,7 @@ BnsMtcTeleport(id) {
 
         tx := StrSplit(ops[A_index], ",")[1] * attr[5] + attr[1]
         ty := StrSplit(ops[A_index], ",")[2] * attr[6] + attr[2]
-        
+
         MouseMove tx, ty
         sleep 100
         MouseClick, left, tx, ty
@@ -104,7 +104,7 @@ BnsMtcMeansureMapGUI() {
             if(FindPixelRGB(x0,y0,x1,y1, 0xD0C2A5, 5)) {
                 tx := findX
                 ty := findY
-                
+
                 ;偏移確認是否為地圖本圖
                 if(FindPixelRGB(findX+10, findY, findX + 20, findY, 0xD0C2A5, 5)) {
                     mapAttr.push(tx - 5)

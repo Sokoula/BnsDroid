@@ -26,11 +26,11 @@ Class BnsDroidChimeraLab {
     SPECIAL_STAGE_HANDLE := 0    ;
 
     FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
-    
-    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2"    ;action member 
-    ; FIGHTING_MEMBERS := "1"    ;action member 
+
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member
+    ; FIGHTING_MEMBERS := "1,2"    ;action member
+    ; FIGHTING_MEMBERS := "1"    ;action member
 
     ;戰鬥成員狀態(array)
     fighterState := [1,1,1,1]
@@ -51,7 +51,7 @@ Class BnsDroidChimeraLab {
 ;================================================================================================================
 ;█ Interface
 ;================================================================================================================
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 取得 cp 設定檔 ****
     ;* @return - .cp file; empty means not used.
@@ -63,7 +63,7 @@ Class BnsDroidChimeraLab {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 廣場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
         return BnsOuF8DefaultGoInDungeon(2, 0)    ;封魔進場, 不確認過圖
     }
@@ -79,10 +79,10 @@ Class BnsDroidChimeraLab {
         {
             case 0:
                 return this.runnableAlone()
-            
+
             case 1:
                 return this.runnableSpecific()
-            
+
             case 2:
                 return this.runnableAll()
         }
@@ -126,7 +126,7 @@ Class BnsDroidChimeraLab {
         }
 
         this.runStageClearMiniBoss2nd()
-        
+
         loop {
             ret := this.runStageFightFinalBoss()
 
@@ -262,12 +262,12 @@ Class BnsDroidChimeraLab {
 
         ShowTipI("●[Mission2] - fight mini boss1...")
         BnsStartAutoCombat()    ;對戰一王
-        
+
         dsleep(5000)
         BnsStopAutoCombat()
         ControlSend,,{q}, %res_game_window_title%
         BnsStartAutoCombat()
-        
+
         dsleep(6500)
         BnsStopAutoCombat()
         ControlSend,,{e}, %res_game_window_title%
@@ -326,7 +326,7 @@ Class BnsDroidChimeraLab {
 
         loop 3 {
             BnsActionSprintToPosition(-4570, 7740)  ;防毒機關
-         
+
             if(BnsIsAvailableTalk() != 0) {
                 ShowTipI("●[Mission3] - disable poison gas mechanism")
                 ControlSend,,{f}, %res_game_window_title%
@@ -367,7 +367,7 @@ Class BnsDroidChimeraLab {
             sleep 3000
         }
         ; BnsActionSprintToPosition(-6240, -2304)  ;龍脈
-        
+
         return 1
     }
 
@@ -447,7 +447,7 @@ Class BnsDroidChimeraLab {
         BnsStopHackSpeed()
 
         return ret
-    }        
+    }
 
 
     ;------------------------------------------------------------------------------------------------------------
@@ -484,14 +484,14 @@ Class BnsDroidChimeraLab {
         BnsActionSprintToPosition(2000, -2770)
         msleep(1000)
         ControlSend,,{Space}, %res_game_window_title%
-        
+
         BnsStartHackSpeed()
         BnsActionSprintToPosition(5000, -2630)
         BnsStopHackSpeed()
         ControlSend,,{Space}, %res_game_window_title%
         msleep(1500)
         ControlSend,,{Space}, %res_game_window_title%
-        
+
         BnsStartHackSpeed()
         BnsActionSprintToPosition(3140, -3670)
         BnsStopHackSpeed()
@@ -499,7 +499,7 @@ Class BnsDroidChimeraLab {
         msleep(1800)
         ControlSend,,{Space}, %res_game_window_title%
         msleep(200)
-        ControlSend,,{Space}, %res_game_window_title%        
+        ControlSend,,{Space}, %res_game_window_title%
 
         return 1
     }
@@ -669,7 +669,7 @@ Class BnsDroidChimeraLab {
             DumpLogD("[State] getBossArea: Right(1)")
             return 1    ;right
         }
-        
+
         DumpLogD("[State] getBossArea: Left(0)")
         return 0    ;left
     }
@@ -693,7 +693,7 @@ Class BnsDroidChimeraLab {
             }
 
 
-            if(this.getBossBlood() == 0 && this.isBoss()) {  ;結束戰鬥, 
+            if(this.getBossBlood() == 0 && this.isBoss()) {  ;結束戰鬥,
                 ShowTipI("[State] - " A_ThisFunc ", boss clear")
                 ret := 3
                 break
@@ -746,7 +746,7 @@ Class BnsDroidChimeraLab {
 
     ;------------------------------------------------------------------------------------------------------------
     ;■ 戰鬥脫離
-    ;* @return - 0: no action; 1~n: escape 
+    ;* @return - 0: no action; 1~n: escape
     ;------------------------------------------------------------------------------------------------------------
     isFightEscape() {
 
@@ -768,7 +768,7 @@ Class BnsDroidChimeraLab {
     }
 
 
-        
-    
+
+
 
 }

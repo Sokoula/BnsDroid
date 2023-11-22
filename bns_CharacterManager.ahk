@@ -84,13 +84,15 @@ BnsCmChangeCharacter(profile) {
     currProfile := []
     currProfile := StrSplit(profile, ",", "`r`n")
 
-    SKILL_CATE := BnsCmGetCate("")    ;3
-    MISSION_ACCEPT := BnsCmIsMissionAccept("")    ;4
-    HIGH_SPEED_ROLE := BnsCmIsHighSpeed("")    
+    SKILL_CATE := BnsCmGetCate("")    ;column 3
+    MISSION_ACCEPT := BnsCmIsMissionAccept("")    ;column 4
+    HIGH_SPEED_ROLE := BnsCmIsHighSpeed("")
 
-    BnsSelectCharacter(currProfile[1])
+    ;當前角色已是 profile, 無需操作角色大廳界面
+    if(BnsCmGetName(BnsCmGetProfile(0)) != BnsGetName()) {
+        BnsSelectCharacter(currProfile[1])
+    }
 
-   
     DumpLogD("[BnsCmChangeCharacter] [" profile "], cid:" currProfile[1] ", role:" BnsRoleType() ", cate:" SKILL_CATE)
     DumpLogD("[BnsCmChangeCharacter] isHighSpeed: " HIGH_SPEED_ROLE ", Leave Battle Time: " currProfile[5])
 
@@ -121,7 +123,7 @@ BnsCmProfileNext() {
 ;================================================================================================================
 BnsCmGetProfile(iterator) {
     profile := ""
-    
+
     if(iterator == 0) {        ;沒指定哪一筆就傳回當前的 profile
         profile := CHARACTER_PROFILES[PROFILES_ITERATOR]
     }
@@ -134,22 +136,22 @@ BnsCmGetProfile(iterator) {
 
 
 ;================================================================================================================
-;    Method - Get Current Character Profile
+;    Method - Get Index
 ;================================================================================================================
 BnsCmGetCid(profile:="") {
     if(profile == "") {
-        return currProfile[1]
+        return StrCfgTrim(currProfile[1])
     }
 
     p := StrSplit(profile, ",", "`r`n")
-    return p[1]
+    return StrCfgTrim(p[1])
 }
 
 
 ;================================================================================================================
-;    Method - Get Current Character Profile
+;    Method - Get Name
 ;================================================================================================================
-BnsCmGetCate(profile:="") {
+BnsCmGetName(profile:="") {
     if(profile == "") {
         return StrCfgTrim(currProfile[2])
     }
@@ -160,36 +162,9 @@ BnsCmGetCate(profile:="") {
 
 
 ;================================================================================================================
-;    Method - Get ARG1(OPTINAL)
+;    Method - Get Skill Category
 ;================================================================================================================
-BnsCmGetArg1(profile:="") {
-    if(profile == "") {
-        return StrCfgTrim(currProfile[5])
-    }
-
-    p := StrSplit(profile, ",", "`r`n")
-    return StrCfgTrim(p[5])
-}
-
-
-
-;================================================================================================================
-;    Method - Get ARG2(OPTINAL)
-;================================================================================================================
-BnsCmGetArg2(profile:="") {
-    if(profile == "") {
-        return StrCfgTrim(currProfile[6])
-    }
-
-    p := StrSplit(profile, ",", "`r`n")
-    return StrCfgTrim(p[6])
-}
-
-
-;================================================================================================================
-;    Method - Is Mission Accept
-;================================================================================================================
-BnsCmIsMissionAccept(profile) {
+BnsCmGetCate(profile:="") {
     if(profile == "") {
         return StrCfgTrim(currProfile[3])
     }
@@ -200,16 +175,29 @@ BnsCmIsMissionAccept(profile) {
 
 
 ;================================================================================================================
+;    Method - Is Mission Accept
+;================================================================================================================
+BnsCmIsMissionAccept(profile) {
+    if(profile == "") {
+        return StrCfgTrim(currProfile[4])
+    }
+
+    p := StrSplit(profile, ",", "`r`n")
+    return StrCfgTrim(p[4])
+}
+
+
+;================================================================================================================
 ;    Method - Get Mission Loop Times
 ;================================================================================================================
 BnsCmGetMissionTimes(profile:="") {
     t := 0
     if(profile == "") {
-        t := StrCfgTrim(currProfile[4])
+        t := StrCfgTrim(currProfile[5])
     }
     else {
         p := StrSplit(profile, ",", "`r`n")
-        t := StrCfgTrim(p[4])
+        t := StrCfgTrim(p[5])
     }
 
     if(t == 0 || t == "") {
@@ -221,13 +209,40 @@ BnsCmGetMissionTimes(profile:="") {
 
 
 ;================================================================================================================
+;    Method - Get ARG1(OPTINAL)
+;================================================================================================================
+BnsCmGetArg1(profile:="") {
+    if(profile == "") {
+        return StrCfgTrim(currProfile[6])
+    }
+
+    p := StrSplit(profile, ",", "`r`n")
+    return StrCfgTrim(p[6])
+}
+
+
+
+;================================================================================================================
+;    Method - Get ARG2(OPTINAL)
+;================================================================================================================
+BnsCmGetArg2(profile:="") {
+    if(profile == "") {
+        return StrCfgTrim(currProfile[7])
+    }
+
+    p := StrSplit(profile, ",", "`r`n")
+    return StrCfgTrim(p[7])
+}
+
+
+;================================================================================================================
 ;    Method - Is High Speed Role
 ;================================================================================================================
 BnsCmIsHighSpeed(profile:="") {
     ;role: 0:disable 1:blademaster 2:kungfufighter 4:shooter 3:forcemaster 6:summoner 7:assassin 5:destoryer
     ;      8:swordmaster 9:warlock 10:soulfighter 11:warrior 12:archer 14:thunderer 15:dualblader 16:musician
     ;職業: 0:不限定  1:劍 2:拳 3:氣 4:槍 5:力 6:召 7:刺 8:燐劍 9:咒 10:乾坤  11:鬥 12:弓 14:天道 15:雙劍 16:樂師
-    
+
     switch BnsRoleType() {
         case ROLE_SWORDMASTER:
             if(BnsCmGetCate(profile) == 2) {
@@ -250,9 +265,8 @@ BnsCmIsHighSpeed(profile:="") {
 ;================================================================================================================
 BnsCmIsProfileLoaded() {
     ret := (PROFILES_ITERATOR != 0) ? 1 : 0
-    
-    DumpLogD("[BnsCmIsProfileLoaded] status = " ret)
 
+    DumpLogD("[BnsCmIsProfileLoaded] status = " ret)
     return ret
 }
 
@@ -265,7 +279,6 @@ BnsCmIsProfilesEOF() {
     ret := (PROFILES_ITERATOR == -1) ? 1 : 0    ;out of bound will set as -1
 
     DumpLogD("[BnsCmIsProfilesEOF] EOF = " ret)
-
     return ret
 }
 

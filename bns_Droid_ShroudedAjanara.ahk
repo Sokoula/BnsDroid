@@ -36,12 +36,12 @@ Class BnsDroidShroudedAjanara {
     ENTERY_POS_Y := 58350.269
 
     ;門外載入點
-    LOAD_POS_X := -15712    
+    LOAD_POS_X := -15712
     LOAD_POS_Y := 57864
 
     ;Mission NPC1 位置
-    NPC1_POS_X := -15400    
-    NPC1_POS_Y := 57915
+    NPC1_POS_X := -15420
+    NPC1_POS_Y := 57925
 
     ;咒法寺
     DEPOTS_POS_X := -13070
@@ -51,7 +51,7 @@ Class BnsDroidShroudedAjanara {
     ;引誘 BOSS 離開中心點(離開王但不會被抓回去的距離)
     BAIT_POS_X := -14021.839
     BAIT_POS_Y := 53122.757
-    
+
     ;千手正中心座標(王回中的位置)
     CENTER_POS_X := -13713.596
     CENTER_POS_Y := 52842.773
@@ -76,7 +76,7 @@ Class BnsDroidShroudedAjanara {
     EXIT_PULSE_POS_Y := 52129.886
 
 
-
+    isMissionAccepted := 0
 
     attackMode := 0
 
@@ -95,13 +95,13 @@ Class BnsDroidShroudedAjanara {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 入場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
         ShowTipI("●[Action] - 導航中...")
 
         loop {
             ;已經在副本裡面, z: 副本內 -3057.xx, 廣場上 -3058.xx
-            if(BnsGetPosZ() > -3058 && BnsMeansureTargetDistDegree(this.CENTER_POS_X, this.CENTER_POS_Y)[1] <= 1467) {              
+            if(BnsGetPosZ() > -3058 && BnsMeansureTargetDistDegree(this.CENTER_POS_X, this.CENTER_POS_Y)[1] <= 1467) {
                 DumpLogD("●[Action] - 導航:已在副本內")
                 return 1
             }
@@ -122,15 +122,51 @@ Class BnsDroidShroudedAjanara {
             ;在屋子外平台上
             if(BnsGetPosZ() > -2730 && BnsMeansureTargetDistDegree(this.CENTER_POS_X, this.CENTER_POS_Y)[1] < 5424) {
                 DumpLogD("●[Action] - 導航:咒法寺平台區")
-                
+
                 if(BnsMeansureTargetDistDegree(this.LOAD_POS_X, this.LOAD_POS_Y)[1] > 1100) {
                     BnsActionSprintToPosition(-14730, 57380)    ;千手房外階梯外
-                }                
-                
-                if(MISSION_ACCEPT == 1) {
-                    BnsActionSprintToPosition(this.NPC1_POS_X, this.NPC1_POS_Y)     ;千手房外NCP名川對話點
                 }
-                BnsActionSprintToPosition(this.LOAD_POS_X, this.LOAD_POS_Y)     ;千手房外傳點前
+
+                ;室外接取任務
+                if(this.isMissionAccepted == 0 && MISSION_ACCEPT == 1) {
+                    BnsActionSprintToPosition(this.NPC1_POS_X, this.NPC1_POS_Y)     ;千手房外NCP名川對話點
+                    sleep 1000
+                    if(BnsIsAvailableTalk() == 18) {
+                        loop 4 {
+                            ControlSend,,{f}, %res_game_window_title%
+                            sleep 200
+                        }
+                    }
+
+                    if(BnsIsNpcTalking() == 1) {
+                        ControlSend,,{ESC}, %res_game_window_title%
+                    }
+                    sleep 1000
+                }
+
+
+                BnsActionWalkToPosition(this.LOAD_POS_X, this.LOAD_POS_Y)     ;千手房外傳點前
+
+                ;室內接取任務
+                if(this.isMissionAccepted == 0 && MISSION_ACCEPT == 1) {
+                    BnsActionWalkToPosition(-16110, 58290,,3000)     ;千手房內NPC
+                    sleep 1000
+
+                    if(BnsIsAvailableTalk() == 18) {
+                        loop 4 {
+                            ControlSend,,{f}, %res_game_window_title%
+                            sleep 200
+                        }
+
+                        if(BnsIsNpcTalking() == 1) {
+                            ControlSend,,{ESC}, %res_game_window_title%
+                        }
+                        sleep 1000
+                    }
+
+                    this.isMissionAccepted := 1
+                }
+
                 BnsActionWalkToPosition(this.ENTERY_POS_X, this.ENTERY_POS_Y,,2000)   ;向機關移動進入房間
                 ret := 1
             }
@@ -177,7 +213,7 @@ Class BnsDroidShroudedAjanara {
                     case 2:
                         cardX := W / 2
                         ; cardX := this.NORMAL_CARD_X
-                        ; cardX := winAttr[1] + (winAttr[5] * 0.5) 
+                        ; cardX := winAttr[1] + (winAttr[5] * 0.5)
 
                     case 3:
                 }
@@ -214,7 +250,7 @@ Class BnsDroidShroudedAjanara {
             case 3:
         }
 
-        
+
     }
 
 
@@ -239,7 +275,7 @@ Class BnsDroidShroudedAjanara {
             ShowTipI("●[Mission] - 開始戰鬥")
             BnsActionWalkToPosition(this.BAIT_POS_X, this.BAIT_POS_Y,,5000)
             BnsStartAutoCombat()
-            
+
             sleep 500
 
             if(this.runStageFinished() == 1) {
@@ -292,12 +328,12 @@ Class BnsDroidShroudedAjanara {
 
             BnsStartHackSpeed()
             BnsStartAutoCombat()
-            ShowTipI("●[Mission] - 繼續戰鬥至 40%")            
+            ShowTipI("●[Mission] - 繼續戰鬥至 40%")
             ; sleep 5000     ;減少無用運算, 視機體而定
 
             sleep 4000
             this.baitBossMoveOutOfCenter()
-            ShowTipI("●[Mission] - 繼續戰鬥至 40%")  
+            ShowTipI("●[Mission] - 繼續戰鬥至 40%")
 
             ;40%
             ; if(this.listenBloodPercent40() == 1){
@@ -305,7 +341,7 @@ Class BnsDroidShroudedAjanara {
                 BnsStopAutoCombat()
                 this.runStageMechanics40()
             }
-            
+
             if(BnsIsCharacterDead()) {
                 ShowTipI("●[Mission] - 角色死亡, 40% 應對失敗")
                 this.resurrection()
@@ -401,7 +437,7 @@ Class BnsDroidShroudedAjanara {
     ;■ 收尾階段: 40% ~ 0%
     ;------------------------------------------------------------------------------------------------------------
     runStageFinished() {
-        return BnsIsEnemyClear(1000, 600)
+        return BnsIsEnemyClear(1000, 600,,,0)
     }
 
 
@@ -501,10 +537,10 @@ Class BnsDroidShroudedAjanara {
         dTime := eTime - sTime
         ShowTipI("●[DEBUG] - etime: " eTime " dTime:" dTime)
 
-        wTime := (dTime > 1800) ? 0 : 1800 - dTime  
+        wTime := (dTime > 1800) ? 0 : 1800 - dTime
 
         ShowTipI("●[DEBUG] - wait time: " wTime)
-        
+
         dsleep(wTime)
 
 
@@ -572,64 +608,64 @@ Class BnsDroidShroudedAjanara {
         switch BnsRoleType() {
             case 1,2,15:       ;劍士123/拳士123/雙劍12
                 ShowTipI("●[Action] - 破盾1: Z")
-                ControlSend,,{z}, %res_game_window_title%        
+                ControlSend,,{z}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(600)
                 ShowTipI("●[Action] - 破盾3: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(100)
 
             case 3:             ;氣功123
                 ShowTipI("●[Action] - 破盾1: 1F")
-                ControlSend,,{1}, %res_game_window_title%        
+                ControlSend,,{1}, %res_game_window_title%
                 dsleep(200)
-                ControlSend,,{f}, %res_game_window_title%        
+                ControlSend,,{f}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾3: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(100)
 
             case 4:             ;槍12
                 ShowTipI("●[Action] - 破盾1: L1F")
                 ControlClick,,%res_game_window_title%,,left ;索鍊
                 dsleep(600)
-                ControlSend,,{1}, %res_game_window_title%        
+                ControlSend,,{1}, %res_game_window_title%
                 dsleep(200)
-                ControlSend,,{f}, %res_game_window_title%        
+                ControlSend,,{f}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 2")
-                ControlSend,,{2}, %res_game_window_title%        
+                ControlSend,,{2}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾3: 2")
-                ControlSend,,{2}, %res_game_window_title%        
+                ControlSend,,{2}, %res_game_window_title%
                 dsleep(100)
 
 
             case 5:             ;力士123
                 ShowTipI("●[Action] - 破盾1: Z")
-                ControlSend,,{z}, %res_game_window_title%        
+                ControlSend,,{z}, %res_game_window_title%
                 dsleep(800)
                 ShowTipI("●[Action] - 破盾2: 4")
-                ControlSend,,{4}, %res_game_window_title%        
+                ControlSend,,{4}, %res_game_window_title%
                 dsleep(600)
                 ShowTipI("●[Action] - 破盾3: 4")
-                ControlSend,,{4}, %res_game_window_title%        
+                ControlSend,,{4}, %res_game_window_title%
                 dsleep(100)
 
             case 6:             ;召喚12
                 ShowTipI("●[Action] - 破盾1: Z")
-                ControlSend,,{tab}, %res_game_window_title%        
+                ControlSend,,{tab}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 4")
-                ControlSend,,{c}, %res_game_window_title%        
+                ControlSend,,{c}, %res_game_window_title%
                 dsleep(600)
                 ShowTipI("●[Action] - 破盾3: 4")
-                ControlSend,,{c}, %res_game_window_title%        
+                ControlSend,,{c}, %res_game_window_title%
                 dsleep(100)
 
             case 7:             ;刺3
@@ -647,72 +683,72 @@ Class BnsDroidShroudedAjanara {
 
             case 8, 12:            ;燐劍12;弓手1
                 ShowTipI("●[Action] - 破盾1: 2")
-                ControlSend,,{2}, %res_game_window_title%        
+                ControlSend,,{2}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(600)
                 ShowTipI("●[Action] - 破盾3: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(100)
 
             case 9:             ;咒術12
                 ShowTipI("●[Action] - 破盾1: 1F")
-                ControlSend,,{1}, %res_game_window_title%        
+                ControlSend,,{1}, %res_game_window_title%
                 dsleep(200)
-                ControlSend,,{x}, %res_game_window_title%        
+                ControlSend,,{x}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: X")
-                ControlSend,,{x}, %res_game_window_title%        
+                ControlSend,,{x}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾3: X")
-                ControlSend,,{x}, %res_game_window_title%        
+                ControlSend,,{x}, %res_game_window_title%
                 dsleep(100)
 
             case 10:          ;乾坤123
                 ShowTipI("●[Action] - 破盾1: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 4")
-                ControlSend,,{4}, %res_game_window_title%        
+                ControlSend,,{4}, %res_game_window_title%
                 dsleep(600)
                 ShowTipI("●[Action] - 破盾3: 4")
-                ControlSend,,{4}, %res_game_window_title%        
+                ControlSend,,{4}, %res_game_window_title%
                 dsleep(100)
 
             case 11:            ;鬥士123
                 ShowTipI("●[Action] - 破盾1: X")
-                ControlSend,,{x}, %res_game_window_title%        
+                ControlSend,,{x}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(600)
                 ShowTipI("●[Action] - 破盾3: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(100)
 
             case 14:            ;天道12
                 ShowTipI("●[Action] - 破盾1: 1X")
                 ControlSend,,{1}, %res_game_window_title%
                 dsleep(100)
-                ControlSend,,{x}, %res_game_window_title%        
+                ControlSend,,{x}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: x")
-                ControlSend,,{x}, %res_game_window_title%        
+                ControlSend,,{x}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾3: x")
-                ControlSend,,{x}, %res_game_window_title%        
+                ControlSend,,{x}, %res_game_window_title%
                 dsleep(100)
 
             case 16:            ;樂師12
                 ShowTipI("●[Action] - 破盾1: 2")
-                ControlSend,,{2}, %res_game_window_title%        
+                ControlSend,,{2}, %res_game_window_title%
                 dsleep(500)
                 ShowTipI("●[Action] - 破盾2: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(600)
                 ShowTipI("●[Action] - 破盾3: 3")
-                ControlSend,,{3}, %res_game_window_title%        
+                ControlSend,,{3}, %res_game_window_title%
                 dsleep(100)
 
         }
@@ -747,7 +783,7 @@ Class BnsDroidShroudedAjanara {
             bossX := GetMemoryHack().getMainBossPosX()
             bossY := GetMemoryHack().getMainBossPosY()
             dist := BnsMeansureTargetDistDegree(this.CENTER_POS_X, this.CENTER_POS_Y, bossX, bossY)[1]
-            
+
             ShowTip("●[Action] - 引誘BOSS離開中間 - 等待 (" bossX ", " bossY ", " dist ")")
 
             if(dist > 250) {
@@ -795,7 +831,7 @@ Class BnsDroidShroudedAjanara {
 
             if(percent < checkPoint) {     ;BOSS 血量低於指定 % 數(公式計算會與遊戲多1%)
                 if(DBUG >= 1) {
-                    ShowTipI("●[System] - 偵測到 BOSS 血量低於" checkPoint "%")  
+                    ShowTipI("●[System] - 偵測到 BOSS 血量低於" checkPoint "%")
                 }
                 return 1
             }
@@ -877,7 +913,7 @@ Class BnsDroidShroudedAjanara {
             ShowTipD("●[Action] - 偵測到BOSS進行 B 類攻擊 ")
             return 2
         }
-       
+
 
         ; if(floor(abs(bossX - this.SKYSTAY_POS_X)) <= 2 && floor(abs(bossY - this.SKYSTAY_POS_Y)) <= 2) {
         ;     ShowTipD("●[Action] - 偵測到BOSS進行 A 類攻擊 ")
@@ -899,13 +935,13 @@ Class BnsDroidShroudedAjanara {
 
         ax := 790 + floor(w * 0.8)
         ay := 120 - floor(h * 0.8)
-        
+
         c := GetPixelColor(ax, ay)
-        
+
         r := GetColorRed(c)
         g := GetColorGreen(c)
         b := GetColorBlue(c)
-         
+
         if (abs(r - g) < 0x10 &&  abs(g - b) < 0x10 && abs(r - b) < 0x10 && r > 0x50) {
             ShowTipD("●[Action] - 偵測到BOSS進行 A 類攻擊 ")
             return 1

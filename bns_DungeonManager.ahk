@@ -15,7 +15,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ;- dungeon ---------------------------------
 #include bns_Droid_CelestialBasinKeys.ahk           ;天之盆地鑰匙
-#include bns_Droid_GhostVillage.ahk                 ;鬼怪村
+#include bns_Droid_KaebiVillage.ahk                 ;鬼怪村
 #include bns_Droid_HongsilWarehouse.ahk             ;紅絲秘密倉庫
 #include bns_Droid_SuspiciousSkyIsland.ahk          ;可疑的空島
 #include bns_Droid_GreatWindwalkRace.ahk            ;天下第一輕功大會
@@ -26,7 +26,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #include bns_Droid_AltarOfTheInfinite.ahk           ;崑崙派本山
 #include bns_Droid_ChaosBlackShenmu.ahk             ;混沌黑神木
 #include bns_Droid_ChimeraLab.ahk                   ;黑龍教異變研究所
-#include bns_Droid_ChaosYetiCave.ahk                ;混沌雪人洞窟                    
+#include bns_Droid_ChaosYetiCave.ahk                ;混沌雪人洞窟
 #include bns_Droid_ShroudedAjanara.ahk              ;千手羅漢陣
 #include bns_Droid_GiantsHart.ahk                   ;巨神之心
 #include bns_Droid_FourInOne.ahk                    ;周任四合一
@@ -38,13 +38,13 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 global ACTIVITY := 0          ;當前活動副本(入門才會有)
 
-global PARTY_MODE := 2        ;組隊模式: 1:入門, 2:一般, 3:困難 
-global DEMONSBANE_LEVEL := 3    ;封魔錄等級            
+global PARTY_MODE := 2        ;組隊模式: 1:入門, 2:一般, 3:困難
+global DEMONSBANE_LEVEL := 3    ;封魔錄等級
 
 global MISSION_ACCEPT := 0     ;是否需要與接廣場NPC交談並接任務
 
 global PARTY_MEMBERS := "1,0,1,2,3,4"
-global FIGHTING_MEMBERS := 1    
+global FIGHTING_MEMBERS := 1
 
 
 
@@ -71,7 +71,7 @@ Class BnsDungeonManager {
                 ret:=this.runnableCelestialBasinKeys()
 
             case 101:
-                ret:=this.runnableGhostVillage()
+                ret:=this.runnableKaebiVillage()
 
             case 102:
                 ret:=this.runnableHongsilWarehouse()
@@ -84,7 +84,7 @@ Class BnsDungeonManager {
 
             case 201:
                 ret:=this.runnableGhostfaceTheater()
-                
+
             case 202:
                 ;TODO: 未完成
 
@@ -100,13 +100,13 @@ Class BnsDungeonManager {
 
             case 206:
                 ret:=this.runnableChaosBlackShenmu()
-            
+
             case 207:
                 ret:=this.runnableChimeraLab()
 
             case 208:
                 ;TBD
-            
+
             case 209:
                 ;TBD
 
@@ -183,7 +183,7 @@ Class BnsDungeonManager {
     ;載入封魔錄;  [ tag ] string();  [ level ] 封魔錄等級;  [ index ] 選項卡順序
     loadDemonsbane(tag, level, index) {
         ShowTipI("●[System] - Select Aerodrome Dungeon " tag "...")
-        
+
         scroll := index > 3 ? mod(index, 3) : 0        ;一次只顯示3個封魔本，超過的要滾輪，一次一個本
         DumpLogD("[BnsGoDungeon_DemonsbaneLoader] tag:'" tag "', level:" level ", index:" index ", scroll:" scroll)
 
@@ -191,10 +191,10 @@ Class BnsDungeonManager {
         BnsOuF8SelectPartyType(2)
 
         ; sleep 4000
-        
+
         if(BnsOuF8SelectDemonsbaneDungeon(level, index - scroll, scroll) == 1) {
             sleep 1000
-            
+
             ;點擊出發等候室倒數5秒
             BnsOuF8TapStartButton()
             sleep 5000
@@ -216,26 +216,51 @@ Class BnsDungeonManager {
     runnableCelestialBasinKeys() {
 
         BnsDroidRun_CelestialBasinKeys()
-        
+
         ;BnsMoveDungeon_CelestialBasinKeys()
     }
 
 
 
 ;================================================================================================================
-;    ■ 101 - Ghost Village - 鬼怪村(活動地表)
+;    ■ 101 - Kaebi Village - 鬼怪村(活動地表)
 ;================================================================================================================
-    runnableGhostVillage() {
-
-        ;sleep 3000
-
-        if(BnsDroidNavigation_GhostfaceVillage() == 0) {
-            return 0
+    runnableKaebiVillage() {
+        if(BnsCmIsProfileLoaded() == 0) {
+            BnsCmLoadCharProfiles(BnsDroidKaebiVillage.getCharacterProfiles())    ;載入Character Profiles
         }
-        
-        sleep 3000
 
-        return BnsDroidRun_GhostfaceVillage()
+        if(BnsCmIsProfilesEOF() == 0) {
+            if(BnsCmGetName(BnsCmGetProfile(0)) != BnsGetName()) {
+                BnsGoCharacterHall()
+            }
+
+            BnsCmChangeCharacter(BnsCmGetProfile(0))    ;切換角色, 0:取得當前 profile
+        }
+        else {
+            return 0    ;finish all character profiles, stop
+        }
+
+        round := BnsCmGetMissionTimes()
+
+        droid := new BnsDroidKaebiVillage()
+
+        loop %round% {
+            ret := 1
+
+            if(droid.dungeonNavigation() == 0) {
+                break           ;沒有入場券了
+            }
+
+            ret := droid.start()    ;開始執行攻略腳本
+
+            if(ret != 0) {
+                droid.finish()        ;腳本收尾
+            }
+        }
+
+        BnsCmProfileNext()    ;切換到下一個 profile
+        return ret
     }
 
 
@@ -275,34 +300,42 @@ Class BnsDungeonManager {
 ;    ■ 103 - Suspicious Sky Island  - 可疑的空島(活動統合)
 ;================================================================================================================
     runnableSuspiciousSkyIsland() {
-        
+
         if(BnsCmIsProfileLoaded() == 0) {
-            BnsCmLoadCharProfiles(BnsDroidGetCP_SuspiciousSkyIsland())    ;載入Character Profiles
+            BnsCmLoadCharProfiles(BnsDroidSuspiciousSkyIsland.getCharacterProfiles())    ;載入Character Profiles
         }
 
         if(BnsCmIsProfilesEOF() == 0) {
-            BnsGoCharacterHall()
-
+            if(BnsCmGetName(BnsCmGetProfile(0)) != BnsGetName()) {
+                BnsGoCharacterHall()
+            }
             BnsCmChangeCharacter(BnsCmGetProfile(0))    ;切換角色, 0:取得當前 profile
-
-            BnsCmProfileNext()    ;切換到下一個 profile
         }
         else {
             return 0    ;finish all character profiles, stop
         }
 
-        ;開始副本前置導航
+        ;地表到F8導航
         BnsOuF8EarthGoLobby()
         sleep 3000
 
-        this.loadHero("SuspiciousSkyIsland", PARTY_MODE, 1)
+        this.loadHero("SuspiciousSkyIsland", 1, 1)  ;活動只會出現在入門
 
-        if(BnsDroidNavigation_SuspiciousSkyIsland() == 0) {
+        droid := new BnsDroidSuspiciousSkyIsland()
+        if(droid.dungeonNavigation() == 0) {
             return 0
         }
 
         ;開始攻略副本
-        return BnsDroidRun_SuspiciousSkyIsland()
+        ret := droid.start()
+
+        if(ret != 0) {
+            droid.finish()        ;腳本收尾
+        }
+
+        BnsCmProfileNext()    ;切換到下一個 profile
+
+        return ret
     }
 
 
@@ -312,7 +345,7 @@ Class BnsDungeonManager {
 ;================================================================================================================
     runnableGreatWindwalkRace() {
         ret := 0
-        
+
         droid := new BnsDroidGreatWindwalkRace()
 
         loop 20 {
@@ -323,7 +356,7 @@ Class BnsDungeonManager {
                 if(ret != 0) {
                     droid.finish()        ;腳本收尾
                 }
-    
+
             }
             else {
                 ret := 0    ;超過活動時段
@@ -344,8 +377,8 @@ Class BnsDungeonManager {
 
         ;BnsGoDungeon_GhostfaceTheater()
         BnsDroidNavigation_GhostfaceTheater()
-        
-        
+
+
 
         ;BnsOuF8GobackLobby()
     }
@@ -387,7 +420,7 @@ Class BnsDungeonManager {
 ;================================================================================================================
     runnableChaosSupplyChain() {
         ret := 0
-        
+
         BnsPcRoomTeamUp()
 
         this.loadDemonsbane("ChaosSupplyChain", DEMONSBANE_LEVEL, 4)
@@ -397,7 +430,7 @@ Class BnsDungeonManager {
         droid := new BnsDroidChaosSupplyChain()
         ; droid.isSpecialStageDetected()
         ; droid.dungeonNavigation()
-        
+
         ret := droid.start()    ;開始執行攻略腳本
 
         if(ret != 0) {
@@ -429,12 +462,12 @@ Class BnsDungeonManager {
         ; ; else {    ;完成
         ;     ; BnsPcTeamMembersPickReward("BnsDroidMembersPickReward_ChaosSupplyChain")
         ; ; }
-        
-        
+
+
         ; if(ret == 1) {    ;完成, 掛機隊友撿箱
         ;     BnsPcTeamMembersPickReward("BnsDroidMembersPickReward_ChaosSupplyChain")
         ; }
-        
+
         ; BnsPcTeamMembersRetreatToLobby()
     }
 
@@ -471,7 +504,7 @@ Class BnsDungeonManager {
     runnableChaosBlackShenmu() {
         ; 初次以 class 方式實現腳本, 與蘭蘭需要外部操作協助不同, 腳本內已整合多人處理
         ret := 0
-        
+
         BnsPcRoomTeamUp()
 
         ; this.loadDemonsbane("ChaosBlackShenmu", DEMONSBANE_LEVEL, 3)
@@ -483,7 +516,7 @@ Class BnsDungeonManager {
         droid := new BnsDroidChaosBlackShenmu()
         ; droid.isSpecialStageDetected()
         ; droid.dungeonNavigation()
-        
+
         ret := droid.start()    ;開始執行攻略腳本
 
         if(ret != 0) {
@@ -503,12 +536,12 @@ Class BnsDungeonManager {
     runnableChimeraLab() {
         ret := 0
         BnsPcRoomTeamUp()
-                                                                                     
+
         ; this.loadDemonsbane("ChimeraLab", DEMONSBANE_LEVEL, 3)
         this.loadHero("ChaosBlackShenmu", PARTY_MODE, 1)
-        
+
         BnsPcTeamMembersSquareNavigation(2)    ;2:封魔錄進場, 1:只確認最後進場過圖完畢
-        
+
         droid := new BnsDroidChimeraLab()
         ret := droid.start()    ;開始執行攻略腳本
 
@@ -576,7 +609,9 @@ Class BnsDungeonManager {
 
         if (BnsCmIsProfilesValid()) {
             if(!BnsCmIsProfilesEOF()) {
-                BnsGoCharacterHall()
+                if(BnsCmGetName(BnsCmGetProfile(0)) != BnsGetName()) {
+                    BnsGoCharacterHall()
+                }
                 BnsCmChangeCharacter(BnsCmGetProfile(0))    ;切換角色, 0:取得當前 profile
             }
             else {
@@ -591,7 +626,7 @@ Class BnsDungeonManager {
 
         loop %round% {
             droid.dungeonNavigation()
-            
+
             ret := droid.start()    ;開始執行攻略腳本
 
             if(ret != 0) {
@@ -626,9 +661,9 @@ Class BnsDungeonManager {
         else {
             return 0    ;finish all character profiles, stop
         }
-        
+
         droid := new BnsDroidGiantsHart()
-        
+
         if(droid.start() != 0) {
             droid.finish()
         }

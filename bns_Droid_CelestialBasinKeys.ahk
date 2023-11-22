@@ -17,13 +17,13 @@ global CB_PickRewardsSecond := 30
 ;================================================================================================================
 BnsDroidRun_CelestialBasinKeys() {
     ;搭配 speed hack
-    
+
     ;自動執行戰鬥
     BnsDroidMission_CB_HuntKey()
-    
+
     ;進入密室
     BnsMoveDungeon_CelestialBasinKeys()
-    
+
     return 1
 }
 
@@ -40,7 +40,7 @@ BnsMoveDungeon_CelestialBasinKeys() {
     ;BnsMoveDungeon_RandomConfuseProtection(1100)
     ;BnsMoveDungeon_RandomConfuseProtection(4300)
     ; sleep 200
-    
+
     BnsActionSprintToPosition(46740, -57730)
     sleep 1000
 
@@ -69,7 +69,7 @@ BnsMoveDungeon_CelestialBasinKeys() {
     ; }
 
     BnsDroidMission_CB_Fail("the entry does not find")
-    
+
     return 0
 }
 
@@ -129,7 +129,7 @@ BnsDroidMission_CB_HuntKeyLegacy(){
     BnsActionWalk(300)
     ;BnsActionWalk(1400)
     sleep 200
-    
+
     ShowTipI("●[Mission1] - Fighting")
     BnsStartStopAutoCombat()
     sleep 5000
@@ -143,7 +143,7 @@ BnsDroidMission_CB_HuntKeyLegacy(){
     ShowTipI("●[Mission1] - Mission Completed")
     sleep 200
     ShowTipI("●[Mission1] - Exit the treasure room")
-    
+
     ;BnsStopHackSpeed()
     sleep 500
     BnsWaitMapLoadDone()

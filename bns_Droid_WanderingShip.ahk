@@ -8,7 +8,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #include bns_Droid_DungeonUtils.ahk
 
 ;================================================================================================================
-;    █ Interface - Get Character Profiles 
+;    █ Interface - Get Character Profiles
 ;================================================================================================================
 BnsDroidGetCP_WanderingShip() {
     return "WanderingShip.cp"
@@ -26,9 +26,9 @@ BnsDroidNavigation_WanderingShip() {
 ;    █ Main
 ;================================================================================================================
 BnsDroidRun_WanderingShip() {
-    
+
     BnsActionFixWeapon()
-    
+
     BnsDroidMission_WS_ExperienceATM()
 
     sleep 13000
@@ -64,13 +64,13 @@ BnsDroid_WS_isZakoClear() {
         else {
             zakoCheck := 0
         }
-        
+
         if(zakoCheck == 5) {
             return 1
         }
         sleep 100
     }
-    
+
     return 0
 }
 
@@ -85,7 +85,7 @@ BnsDroidMission_WS_ExperienceATM() {
     ;開啟 CE 加速
     BnsStartHackSpeed()
     sleep 100
-    
+
     BnsActionWalk(4250)
     BnsActionLateralWalkLeft(2200)
     sleep 100
@@ -96,12 +96,12 @@ BnsDroidMission_WS_ExperienceATM() {
     BnsActionWalk(1000)
     BnsActionLateralWalkLeft(1600)    ;吸引上邊怪, 走到左邊等待, 不要修改
     sleep 1000
-    
+
     ;關閉 CE 加速
     BnsStopHackSpeed()
 
     ;BnsDroidSkill_ProtectBeforeFighting(BnsRoleType())
-    
+
     ;使用自動戰鬥轉向
     BnsStartStopAutoCombat()
     sleep 100
@@ -147,7 +147,7 @@ BnsDroidMission_WS_ExperienceATM() {
     ShowTipI("●[MissionA] - start fighting for part B...")
     ;開始自動戰鬥
     BnsStartStopAutoCombat()
-    
+
     sleep 2000
 
     while(BnsIsEnemyDetected() > 0 && CommonTimeout == 0) {

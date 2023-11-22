@@ -42,7 +42,7 @@ BnsDroidRun_SandstormTemple() {
     ;if(BnsDroidMission_GT_KillFinalBoss() == 0) {
     ;    return 0
     ;}
-    
+
     ;取得將勵
     ;BnsDroidMission_RewardAndSecret()
 }
@@ -77,13 +77,13 @@ BnsDroid_ST_isZakoClear() {
         else {
             zakoCheck := 0
         }
-        
+
         if(zakoCheck == 5) {
             return 1
         }
         sleep 100
     }
-    
+
     return 0
 }
 
@@ -94,7 +94,7 @@ BnsDroid_ST_isZakoClear() {
 ;################################################################################################################
 BnsDroidMission_ST_ClearLittleBossCorridor() {
     ShowTipI("●[Mission1] - Clear the corridor before littl Boss")
-    
+
     BnsActionWalk(6000)
     BnsActionLateralWalkLeft(4000)
     sleep 100
@@ -121,20 +121,20 @@ BnsDroidMission_ST_ClearLittleBossCorridor() {
 
     ;開抵抗
     BnsDroidSkill_ProtectBeforeFighting(BnsRoleType())
-    
+
     ;原地等待雜魚集中
     sleep 10000
-    
+
     ;自動戰鬥開啟
     BnsStartStopAutoCombat()
 
     ;確定清完 Stage1 小怪
     if(BnsDroid_ST_isZakoClear() == 1) {
         ShowTipI("●[Mission1] - Corridor stage1 clear")
-        
+
         ;等自動戰鬥回到定位
         sleep 300
-        
+
         ;關閉自動戰鬥
         BnsStartStopAutoCombat()
     }
@@ -144,12 +144,12 @@ BnsDroidMission_ST_ClearLittleBossCorridor() {
 
     ;尋找走廊房間
     BnsDroidMission_ST_TargetCorridor2()
-    
-    
 
 
 
-    
+
+
+
     return 1
 }
 
@@ -161,14 +161,14 @@ BnsDroidMission_ST_ClearLittleBossCorridor() {
 BnsDroidMission_ST_TargetCorridor1() {
     sX := WIN_CENTER_X - (WIN_BLOCK_WIDTH * 7) + 15
     sY := WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 5)
-    
+
     hit := 0
-    
+
     BnsActionAdjustCamara(-50, 11)
 
     loop, 20 {
         Gray := GetColorGray(GetPixelColor(sX, sY))
-        
+
         ShowTipD("●[Mission3] - Gray:" Gray ", x:" sX ", y:" sY ", hit:" hit)
 
         if Gray between 50 and 90
@@ -265,9 +265,9 @@ BnsDroidMission_ST_TargetCorridor2() {
 
         sleep 20
     }
-    
+
     DumpLogE("[BnsDroidMission_ST_TargetCorridor2] search done, pattern not found.")
     return 0
-    
-    
+
+
 }

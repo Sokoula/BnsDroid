@@ -34,7 +34,7 @@ BnsPcGetPartyMemberList() {
 
 ;@discard
 ;Get teleport desktop id; @return - integer
-BsnPcGetTeleporterDid() {    
+BsnPcGetTeleporterDid() {
     partyCtrl := StrSplit(PARTY_MEMBERS, ",", "`r`n")
     return partyCtrl[2]
 }
@@ -59,7 +59,7 @@ BnsPcGetCurrentDid() {    ;desktop id
 ;隊伍遨請; [ name ] 角色名稱; [ dId ] 角色所在桌面
 BnsPcSendPartyInvite(name, dId) {
     currentId := getCurrentDesktopId()
-    
+
     ControlSend,,{ENTER}, %res_game_window_title%
     ControlSend,,/invite %name%, %res_game_window_title%
     sleep 600
@@ -79,15 +79,15 @@ BnsPcSendPartyInvite(name, dId) {
     WinActivate, %res_game_window_title%
 
     info:=GetTextOCR(165, 1030, 300, 30, res_game_window_title)
-    
-    if(RegExMatch(info, "加.了.+隊伍") != 0) {    
+
+    if(RegExMatch(info, "加.了.+隊伍") != 0) {
         if(DBUG == 1) {
             DumpLogD("[BnsPcSendPartyInvite] party member " name " joined")
         }
 
         return 1
     }
-    
+
     return 0
 }
 
@@ -105,7 +105,7 @@ BnsPcLeaveParty(dId) {
 
 
 ;================================================================================================================
-;    ACTION - enter room and team party 
+;    ACTION - enter room and team party
 ;================================================================================================================
 BnsPcRoomTeamUp() {
     partyCtrl := StrSplit(PARTY_MEMBERS, ",", "`r`n")
@@ -128,7 +128,7 @@ BnsPcRoomTeamUp() {
     ;切到 leader 桌面, 取得 room id
     switchDesktopByNumber(leaderId)
     sleep 1000
-    
+
     if(DBUG == 3) {
         ScreenShot()
     }
@@ -165,7 +165,7 @@ BnsPcRoomTeamUp() {
 
 
 ;================================================================================================================
-;    ACTION - Square Navigation 
+;    ACTION - Square Navigation
 ;================================================================================================================
 ;團隊副本廣場導航; [ cate ] 1=英雄, 2=封魔;  [ onlyLastConfirm ] 0=確認每個都過完圖, 1=只確認最後一個過完圖(default)
 BnsPcTeamMembersSquareNavigation(cate, onlyLastConfirm := 1) {  ;cate(1英雄/2封魔), onlyLastConfirm(0認過每個圖/1只確認最後一個過圖)
@@ -185,12 +185,12 @@ BnsPcTeamMembersSquareNavigation(cate, onlyLastConfirm := 1) {  ;cate(1英雄/2�
         sleep 500
         WinActivate, %res_game_window_title%
         sleep 500
-        
+
         ;預設只檢查最後一個組員進副本讀完圖(前面不檢查以節省時間)
         confirm := (onlyLastConfirm) ? ((A_index == members) ? 1 : 0) : 1
 
         ;進入副本
-        if(BnsOuF8DefaultGoInDungeon(cate,, confirm) == 1) {        
+        if(BnsOuF8DefaultGoInDungeon(cate,, confirm) == 1) {
             ret++
         }
 
@@ -236,11 +236,11 @@ BnsPcOpenDragonPulse(ms) {
     sleep 30
     send {s}
     sleep 2000
-    
+
     ;歸回原位
     BnsActionWalk(ms)
     sleep 500
-    
+
     ;切到 leader 桌面
     switchDesktopByNumber(leaderId)
     sleep 500
@@ -274,7 +274,7 @@ BnsPcTeamMemberAction(fnAction, mids := "", feedback := 0, backleader := 1, dela
     For i, m in mids {
         ; member := partyCtrl[2 + A_index]
         ; switchDesktopByNumber(member)
-        
+
         if(m == "" || m < 1) {   ;mId 沒有值, mId < 1 無效參數, 不處理
             continue
         }
@@ -310,13 +310,13 @@ BnsPcTeamMemberAction(fnAction, mids := "", feedback := 0, backleader := 1, dela
 
 
 ;================================================================================================================
-;    ACTION - Team Bidding 
+;    ACTION - Team Bidding
 ;================================================================================================================
 BnsPcTeamMembersBidding(bidId) {
     partyCtrl := StrSplit(PARTY_MEMBERS, ",", "`r`n")
     members := partyCtrl[1]
     leaderId := partyCtrl[3]
-    
+
     loop %members% {
         mid := partyCtrl[2 + A_index]
 
@@ -348,13 +348,13 @@ BnsPcTeamMembersBidding(bidId) {
 ;團隊撿取戰利品 @return: 執行完成次數
 BnsPcTeamMembersPickReward(funcName) {
     cbPtr := func(funcName)
-    
+
     ret := 0
 
     partyCtrl := StrSplit(PARTY_MEMBERS, ",", "`r`n")
     members := partyCtrl[1] - 1
     leaderId := partyCtrl[3]
-    
+
     ;換角色
     loop, %members% {
         member := partyCtrl[3 + A_index]
@@ -369,8 +369,8 @@ BnsPcTeamMembersPickReward(funcName) {
     switchDesktopByNumber(leaderId)
     sleep 2000
     WinActivate, %res_game_window_title%
-    
-    DumpLogD("[BnsPcTeamMembersPickReward] ret= " ret)    
+
+    DumpLogD("[BnsPcTeamMembersPickReward] ret= " ret)
     return ret
 }
 
@@ -382,11 +382,11 @@ BnsPcTeamMembersPickReward(funcName) {
 ;#onlyLastConfirm - 0:驗證每個組員過完圖, 1:只驗證最後一個組員過完圖(default)
 BnsPcTeamMembersRetreatToLobby(onlyLastConfirm := 1) {
     ret := 0
-    
+
     partyCtrl := StrSplit(PARTY_MEMBERS, ",", "`r`n")
     ; members := partyCtrl[1] - 1
     members := partyCtrl[1]
-    
+
     ;換角色
     loop, %members% {
         ; member := partyCtrl[3 + A_index]
@@ -405,6 +405,6 @@ BnsPcTeamMembersRetreatToLobby(onlyLastConfirm := 1) {
         sleep 100
     }
 
-    DumpLogD("[BnsPcTeamMembersRetreatToLobby] ret= " ret)        
+    DumpLogD("[BnsPcTeamMembersRetreatToLobby] ret= " ret)
     return ret
 }

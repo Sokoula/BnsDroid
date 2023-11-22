@@ -26,6 +26,7 @@ global MISSION_ACCEPT := 0    ;是否需要與接廣場NPC交談並接任務
 ;================================================================================================================
 ;    Common
 ;================================================================================================================
+;@Discard
 BnsOuF8Init() {
     ;建立 f8 副本列表預覽地圖(Hero本時double check用, Aerodrome本用來選取副本)
     ;封魔本出了之後 Hero 本有問題，待修
@@ -38,9 +39,9 @@ BnsOuF8Init() {
     ArrHeroPreviews.push("pic_f8_dungeon_preview_sendstorm")    ;13, 沙暴是列表上第13個(不算活動本)
 
 
-    ArrAerodromePreviews.push("empty" 1)                                        ;1, 
+    ArrAerodromePreviews.push("empty" 1)                                        ;1,
     ArrAerodromePreviews.push("empty" 1)                                        ;2,
-    ArrAerodromePreviews.push("pic_f8_dungeon_preview_ChaosSupplyChain1")       ;3, 
+    ArrAerodromePreviews.push("pic_f8_dungeon_preview_ChaosSupplyChain1")       ;3,
 }
 
 ;================================================================================================================
@@ -48,9 +49,9 @@ BnsOuF8Init() {
 ;================================================================================================================
 BnsOuF8EarthGoLobby() {
     ;按下 F8
-    Send, {F8}
+    ControlSend,,{f8}, %res_game_window_title%
     sleep 200
-    
+
     ; TODO: 座標是寫死的, 需要後續改為自適配
     sx := floor(WIN_CENTER_X - WIN_BLOCK_WIDTH * 2.8)
     sy := floor(WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 2.3 + 32)
@@ -58,10 +59,12 @@ BnsOuF8EarthGoLobby() {
     rh := floor(WIN_BLOCK_HEIGHT * 2.3)
     val := GetTextOCR(sx, sy, rw, rh, res_game_window_title)    ; PaddleOCR 注意參數皆需要 int, 否則報錯
 
+    ; msgbox % sx ", " sy ", " rw ", " rh " : " val
+
     if(val == res_sys_f8_unicom_dungeon_card_title) {
         MouseClick, left, sx + rw * 0.5, sy + rh * 0.5
         sleep 3000
-        
+
         return BnsOuF8LobbyWaitingReady()
     }
     else {
@@ -74,12 +77,12 @@ BnsOuF8EarthGoLobby() {
 BnsOuF8EarthGoLobbyPic() {
     global findX
     global findY
-    
+
 
 
     if(FindPicList(0, 0, 1920, 1200, 80, "res\pic_f8_entry_pattern") == 1) {
-    
-    
+
+
         ShowTipD(findX ", " findY)
 
         ;點擊 F8 卡片
@@ -128,7 +131,7 @@ BnsOuF8GobackLobby(confirm := 1) {
             sleep 1200
 
             if(FindPicList(WIN_CENTER_X, WIN_CENTER_Y, WIN_WIDTH, WIN_HEIGHT, 120, "res\pic_reward_button") == 1) {
-                
+
                 ControlSend,,{f}, %res_game_window_title%
                 sleep 500
 
@@ -152,7 +155,7 @@ BnsOuF8GobackLobby(confirm := 1) {
                 ; ControlSend,,{f}, %res_game_window_title%
                 ; sleep 300
             }
-            
+
             if(BnsIsMapLoading() == 1) {
                 if(DBUG == 1) {
                     DumpLogD("[BnsOuF8GobackLobby] Operation success, map loading")
@@ -183,7 +186,7 @@ BnsOuF8GetRoomNumberMem() {
 ;OCR method
 BnsOuF8GetRoomNumberOCR() {
     posNumTail := 230
-    
+
     loop {
         ;尋找房號尾碼邊界, 條件是 5個 pixel 的寬度內找不到白色
         if(FindPixelRGB(posNumTail, 70, posNumTail + 7, 80, 0xFFFFFF, 0) == 0) {    ;posistion
@@ -278,7 +281,7 @@ BnsOuF8TapStartButton() {
 BnsOuF8SelectPartyType(t) {
     regions := StrSplit(PARTY_FORM_HEADER_TAB_REGION, ",", "`r`n")
     ret := 0
-    
+
     ;PARTY_FORM_HEADER_TAB_REGION
     ;[    副本    |    戰場    ]
     ;[    :  英雄 : 封魔  :    ]
@@ -441,7 +444,7 @@ BnsOuF8SelectHeroDungeon(index, scroll := 0) {
     unitH := regions[4] / 2
 
     mX := regions[1] + (regions[3] * 0.5)
-    mY := regions[2] + (unitH * (9.38 - 0.38)) + (index * unitH * 0.77)  
+    mY := regions[2] + (unitH * (9.38 - 0.38)) + (index * unitH * 0.77)
     ;9.38 - 0.38 預算把滑鼠點擊位置置於卡片中間
     ;0.77 = (0.71 + 0.83 ) / 2 -- 30 ~ 35 間取平均卡片高度
 
@@ -474,18 +477,18 @@ BnsOuF8SelectHeroDungeonPic(index, scroll) {
         if(tabDungeonX != 0 && tabDungeonY !=0) {
             click
             sleep 100
-            
+
             ;先定位副本tab，再移動到副本列表第 index 列
             oX:=tabDungeonX + 100
             oY:=tabDungeonY + FIRST_OPTION_Y + ((index - 1) * OPTION_HIGHT)
-            
+
             ;loop, 3 {
                 DumpLogD("[BnsOuF8SelectHeroDungeon] option x:" oX ", y:" oY " [index:" index ", FIRST_OPTION_Y:" FIRST_OPTION_Y ", OPTION_HIGHT:" OPTION_HIGHT "]")
                 MouseMove oX, oY
                 sleep 100
-                MouseGetPos, xPos, yPos     
+                MouseGetPos, xPos, yPos
                 DumpLogD("[BnsOuF8SelectHeroDungeon] get pos x:" xPos ", y:" yPos )
-                
+
                 ;if(Abs(oy - ypos) < 2) {    ;檢查是否確實點到想要的位置, 沒有就重做
                 ;    break
                 ;}
@@ -495,7 +498,7 @@ BnsOuF8SelectHeroDungeonPic(index, scroll) {
             ;將副本表拉到最頂以歸0校準
             MouseWheel(1, 20)
             sleep 200
-        
+
             MouseWheel(-1, scroll)
             sleep 200
 
@@ -529,14 +532,14 @@ BnsOuF8SelectHeroDungeonPic(index, scroll) {
 ;================================================================================================================
 BnsOuF8SelectDemonsbaneDungeon(level, index, scroll) {
     regions := StrSplit(PARTY_FORM_HEADER_TAB_REGION, ",", "`r`n")
-    
+
     unitH := regions[4] / 2        ;整個封魔表單為 16.33 單位((副本/戰場+英雄/封魔錄)/2)
     itemH := floor(unitH * 4.69 * 0.33)        ;封魔副本選項卡
-    
+
     mx := regions[1] + regions[3] * 0.68
     my := regions[2] + floor(unitH * 11.64 + (itemH * ((index - 1) + 0.5)))
     MouseMove mx, my
-    
+
     ;選擇副本(座標定位)
     MouseClick, left, mx, my
     sleep 1000
@@ -557,7 +560,7 @@ BnsOuF8SelectDemonsbaneDungeon(level, index, scroll) {
     ;點擊段數
     MouseClick, left, mx, regions[2] + unitH * 7
     sleep 1000
-    
+
     ;輸入段數
     Send {Shift down}{Left 3}{Shift up}
     sleep 500
@@ -583,7 +586,7 @@ BnsOuF8SelectDemonsbaneDungeon_R(level, index, scroll) {
     ;    DumpLogE("[BnsOuF8SelectDemonsbaneDungeon] index:" index ", scroll:" scroll ", select incorrect!")
     ;    return 0
     ;}
-    
+
     ;選擇副本(座標定位)
     MouseClick, left, WIN_THREE_QUARTERS_X + WIN_BLOCK_WIDTH * 4, WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 0.15) + (WIN_BLOCK_HEIGHT * index)
     sleep 1000
@@ -591,7 +594,7 @@ BnsOuF8SelectDemonsbaneDungeon_R(level, index, scroll) {
     ;點擊段數
     MouseClick, left, WIN_CENTER_X + WIN_BLOCK_WIDTH * 13,  WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 1.3
     sleep 1000
-    
+
     ;輸入段數
     Send {Shift down}{Right 3}{Shift up}
     sleep 500
@@ -616,7 +619,7 @@ BnsOuF8LobbyWaitingReady() {
         val := GetTextOCR(regions[1], regions[2], floor(regions[3] * 0.5), floor(regions[4] * 0.6), res_game_window_title)
         if(val == res_lobby_label_tab_dungeon) {
             ShowTipI("●[System] Entre F8 hall")
-            return 1            
+            return 1
         }
 
         sleep 200
@@ -638,7 +641,7 @@ BnsOuF8LobbyWaitingReadyPic() {
 
         sleep 200
     }
-    
+
     ShowTipE("●[Exception] - Loading timeout...")
     return 0
 }
@@ -646,7 +649,7 @@ BnsOuF8LobbyWaitingReadyPic() {
 
 
 ;================================================================================================================
-;    ACTION - 
+;    ACTION -
 ;================================================================================================================
 ;F8 square navigation; [ cate ] 1:英雄; 2:封魔(demonsbane);  [ accept ] 0:不接任務; 1:接任務;  [ confirm ] 0:不等待過圖完畢立即返回; 1:等待過圖完畢反回
 BnsOuF8DefaultGoInDungeon(cate, accept := 0, confirm := 1) {
@@ -654,10 +657,10 @@ BnsOuF8DefaultGoInDungeon(cate, accept := 0, confirm := 1) {
 
         switch cate {
             case 1:    ;Hero
-                px1 := 77632, py1 := 658
-                px2 := 77770, py2 := 815
+                px1 := 77644, py1 := 716
+                px2 := 77970, py2 := 840
                 px3 := 78030, py3 := 1200
-    
+
             case 2:    ;Demonsbane
                 px1 := 77575, py1 := 685
                 px2 := 78025, py2 := 980
@@ -668,15 +671,20 @@ BnsOuF8DefaultGoInDungeon(cate, accept := 0, confirm := 1) {
 
             BnsActionSprintToPosition(px1, py1)
             ; BnsActionAdjustDirection(90)
-            sleep 500
+            sleep 1200
 
-            Send {f}
+            ControlSend,,{f}, %res_game_window_title%
             loop ,2 {
                 sleep 1000
-                Send {f} {f}
+                ControlSend,,{f}, %res_game_window_title%
+                sleep 100
+                ControlSend,,{f}, %res_game_window_title%
             }
-            Send {Esc}
-            sleep 100
+
+            if() {
+                ControlSend,,{ESC}, %res_game_window_title%
+                sleep 100
+            }
 
             BnsActionSprintToPosition(px2, py2)
         }
@@ -686,14 +694,14 @@ BnsOuF8DefaultGoInDungeon(cate, accept := 0, confirm := 1) {
 
         if(confirm == 1) {
             sleep 3000
-    
+
             ;等待廣場進副本讀圖完畢
             if(BnsWaitMapLoadDone() == 0) {
                 BnsOuF8GobackLobby()
                 return 0
             }
         }
-    
+
         return 1
     }
     else {
@@ -719,7 +727,7 @@ BnsOuF8DefaultGoInDungeonLegacy(cate, accept := 0, confirm := 1) {
             duration3 := 12000
 
     }
-    
+
     if(HIGH_SPEED_ROLE == 1) {
         duration1 := duration1 * 0.92
         duration2 := duration2 * 0.92
@@ -735,7 +743,7 @@ BnsOuF8DefaultGoInDungeonLegacy(cate, accept := 0, confirm := 1) {
         sleep 1400
         Send {w Up}
         sleep 100
-        
+
         Send {f}
         loop ,2 {
             sleep 1000

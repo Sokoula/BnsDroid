@@ -37,7 +37,7 @@ global LOGPATH := "log.txt"
 
 ;---F8副本選單設定---
 ;(覆寫 bns_DungeonDispater.ahk 預設值)
-global ACTIVITY := 1        ;當前活動副本(入門才會有)        
+global ACTIVITY := 1        ;當前活動副本(入門才會有)
 global PARTY_MODE := 2        ;組隊模式: 1:入門, 2:一般, 3:困難
 global PARTY_MEMBERS := "1,0,1,2,3,4"    ;組隊人數(桌面使用個數)
 
@@ -75,7 +75,7 @@ global DUNGEON_INDEX := 301        ;最後會被 config.ini 複蓋
 ImportExternIniConfig() {
     ;使用 #include 方式直接以 AHK 的方式載入變數; 缺點: 每次更動都需要執行 reload, 而且不能有不符合 ini 的格式
     ;#include config.ini
-    
+
     ;補正實際運作誤差
     WIN_WIDTH := WIN_WIDTH + 2
     WIN_HEIGHT := WIN_HEIGHT + 32
@@ -86,7 +86,7 @@ ImportExternIniConfig() {
 ;    Read variables form each line in INI file                                                          ;
 ;-------------------------------------------------------------------------------------------------------;
 LoadExternIniConfig() {
-    if(!FileExist("config.ini")) { 
+    if(!FileExist("config.ini")) {
         return
     }
 
@@ -120,7 +120,7 @@ LoadExternIniConfig() {
 ;-------------------------------------------------------------------------------------------------------;
 ;@DISCARD
 ReadExternIniConfig() {
-    if(!FileExist("config.ini")) { 
+    if(!FileExist("config.ini")) {
         return
     }
 
@@ -145,19 +145,19 @@ ReadExternIniConfig() {
 ;-------------------------------------------------------------------------------------------------------;
 ;@DISCARD
 SetConfigValue(key, value) {
-    
+
     switch key
     {
         ;--System Environment(環境&系統)----------------------------------
         case "start_hotkey":
             HKEY := value
-        
+
         case "pause_resume_hotkey":
             PRKEY := value
 
         case "debug_enable":
             DBUG := value
-        
+
         case "dump_log_enable":
             DUMPLOG := value
 
@@ -189,7 +189,7 @@ SetConfigValue(key, value) {
 
         case "confuse_protect":
             CONFUSE_PROTECT:=value
-            
+
         case "enemy_boss_level_indicator_region":
             ENEMY_BOSS_LEVEL_REGION := value
 
@@ -237,7 +237,7 @@ SetConfigValue(key, value) {
             DumpLogW("[SetConfigValue] LoadExternConfig - Illegal config!! key: " key ", value:" value)
             return
     }
-    
+
     DumpLogD("[SetConfigValue] LoadExternConfig - key: " key ", value:" value)
 }
 

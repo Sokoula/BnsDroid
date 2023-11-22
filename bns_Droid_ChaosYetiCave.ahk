@@ -26,11 +26,11 @@ Class BnsDroidChaosYetiCave {
     SPECIAL_STAGE_HANDLE := 0    ;
 
     FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
-    
-    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2"    ;action member 
-    ; FIGHTING_MEMBERS := "1"    ;action member 
+
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member
+    ; FIGHTING_MEMBERS := "1,2"    ;action member
+    ; FIGHTING_MEMBERS := "1"    ;action member
 
     ;戰鬥成員狀態(array)
     fighterState := [1,1,1,1]
@@ -39,7 +39,7 @@ Class BnsDroidChaosYetiCave {
 ;================================================================================================================
 ;█ Interface
 ;================================================================================================================
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 取得 cp 設定檔 ****
     ;* @return - .cp file; empty means not used.
@@ -51,7 +51,7 @@ Class BnsDroidChaosYetiCave {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 廣場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
         return BnsOuF8DefaultGoInDungeon(2, 0)    ;封魔進場, 不確認過圖
     }
@@ -208,7 +208,7 @@ Class BnsDroidChaosYetiCave {
         }
 
         BnsStopHackSpeed()
-        
+
         ShowTipI("●[Mission1] - Stage clear")
 
         return 1
@@ -239,7 +239,7 @@ Class BnsDroidChaosYetiCave {
                 BnsStopAutoCombat()
             }
         }
-        
+
         if(this.actionDestroyRoadBlock() == 0) {   ;打爆圖騰
             return 0
         }
@@ -331,12 +331,12 @@ Class BnsDroidChaosYetiCave {
     ;------------------------------------------------------------------------------------------------------------
     runStageFightFinalBoss(mIds := "") {
         ret := 0
-        
+
         ;未指定 mIds, 默認 FIGHTING_MEMBERS
         mIds := (!mIds) ? StrSplit(FIGHTING_MEMBERS, ",") : mIds
 
         ;指定的 mIds 為字串(非陣列)時, 先轉換為陣列
-        fighters := (!isObject(mIds)) ? StrSplit(mIds, ",") : mIds        
+        fighters := (!isObject(mIds)) ? StrSplit(mIds, ",") : mIds
 
         ShowTipI("●[Mission4] - Start to clear the final boss")
         BnsStartHackSpeed()
@@ -398,7 +398,7 @@ Class BnsDroidChaosYetiCave {
         sleep 2000
 
         return ret
-    }        
+    }
 
 
     ;------------------------------------------------------------------------------------------------------------
@@ -408,12 +408,12 @@ Class BnsDroidChaosYetiCave {
     runStageEnding() {
         ;執行 pickReward
         ; fn := func(this.pickReward.name).bind(this)
-        ; BnsPcTeamMemberAction(fn, , 1, 0)  ; 回傳執行mId, 不切回 leader 
+        ; BnsPcTeamMemberAction(fn, , 1, 0)  ; 回傳執行mId, 不切回 leader
         ShowTipI("●[Mission5] - pick reward")
 
         this.pickReward()
         ShowTipI("●[Mission5] - Mission completed")
-        
+
         sleep 2000
         return 1
     }
@@ -454,7 +454,7 @@ Class BnsDroidChaosYetiCave {
     ;------------------------------------------------------------------------------------------------------------
     actionGoToFinalRoom() {
         BnsStartHackSpeed()
-        
+
         ;撿取小王箱
         BnsActionSprintToPosition(3530, -820)      ;小王房中間
         BnsStartAutoCombat()
@@ -463,8 +463,8 @@ Class BnsDroidChaosYetiCave {
         BnsStopAutoCombat()
 
         BnsActionSprintToPosition(4350, -1400,,8000,50)    ;小王房斜坡底
-        BnsActionSprintToPosition(5160, -840,,8000,50)      
-        BnsActionSprintToPosition(5640, -40,,8000,50)       
+        BnsActionSprintToPosition(5160, -840,,8000,50)
+        BnsActionSprintToPosition(5640, -40,,8000,50)
         BnsActionWalkToPosition(5800, 410,,8000,50)        ;轉角慢速防卡圖錯位1
         BnsActionWalkToPosition(5620, 880,,8000,50)        ;轉角慢速防卡圖錯位2
         BnsActionWalkToPosition(5070, 1140,,8000,50)       ;轉角慢速防卡圖錯位3
@@ -551,7 +551,7 @@ Class BnsDroidChaosYetiCave {
                 this.takeDragonPulse(1)
                 sleep 6000
                 this.actionGoToFinalRoom()
-            
+
             case 3:     ;尾王直達
                 this.takeDragonPulse(2)
                 sleep 6000
@@ -645,7 +645,7 @@ Class BnsDroidChaosYetiCave {
     ;------------------------------------------------------------------------------------------------------------
     pickReward(mIds := "") {
         DumpLogD("●[Action] - " A_ThisFunc)
-        
+
         this.moveToBossRoom(2, BnsPcGetPartyMemberList())
         ; this.startTeamAutoCombat(BnsPcGetPartyMemberList())
         sleep 3000
@@ -658,7 +658,7 @@ Class BnsDroidChaosYetiCave {
     ;------------------------------------------------------------------------------------------------------------
     startTeamAutoCombat(mIds := 0) {
         midsArray := (!isObject(mIds)) ? StrSplit(mIds, ",") : mIds
-        
+
         fn := func("BnsStartAutoCombatSpeed")
         BnsPcTeamMemberAction(fn, midsArray)    ;全員開始自動戰鬥
     }
@@ -688,7 +688,7 @@ Class BnsDroidChaosYetiCave {
         ret := 0
         disengage := 0
         tick := A_TickCount
-        
+
 
         loop {
             ;角色死亡
@@ -748,10 +748,10 @@ Class BnsDroidChaosYetiCave {
         return floor(GetMemoryHack().getMainTargetBlood() / GetMemoryHack().getMainTargetBloodFull() * 100)
     }
 
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 戰鬥脫離
-    ;* @return - 0: no action; 1~n: escape 
+    ;* @return - 0: no action; 1~n: escape
     ;------------------------------------------------------------------------------------------------------------
     isFightEscape() {
 

@@ -10,7 +10,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 global GT_BOSS1_JUMP_PROTECT_TIMER := -3200
 
 ;================================================================================================================
-;    █ Interface - Get Character Profiles 
+;    █ Interface - Get Character Profiles
 ;================================================================================================================
 BnsDroidGetCP_GhostfaceTheater() {
     return "GhostfaceTheater.cp"
@@ -83,11 +83,11 @@ BnsDroidRun_GhostfaceTheater() {
     if(BnsDungeonLeave(5300) == 0) {    ;有商人3300, 沒商人5300
         return BnsDungeonRetreat()
     }
-    
+
     ;if(BnsDungeonLeave(BsnLookingExit()) == 0) {
     ;    return BnsDungeonRetreat()
     ;}
-    
+
 }
 
 
@@ -133,7 +133,7 @@ BnsDroidMission_GT_KillGateKeeper() {
 
         ;啟動非同步計時，時間到放技能
         SetTimer, GT_GATE_FIGHTING_SKILL_THREAD, -5800        ;戰鬥中施放(負值表示只執行一次，不需另設off)
-        
+
         ;啟動非同步計時，計算長CD時間
         if(PARTY_MODE == 3){
             global SkillAsyncLock := 1
@@ -149,7 +149,7 @@ BnsDroidMission_GT_KillGateKeeper() {
         while(BnsIsEnemyDetected() > 0 && CommonTimeout == 0) {
             sleep 100
         }
-        
+
         if(CommonTimeout == 1) {
             BnsDroidMission_GT_Fail("Fight timeout, escape gatekeeper fighting program")
             return 0
@@ -170,7 +170,7 @@ BnsDroidMission_GT_KillGateKeeper() {
         ;ShowTip("●[Mission1] - Exception, no found gatekeeper")
         return 0
     }
-    
+
     return 1
 }
 
@@ -217,7 +217,7 @@ BnsDroidMission_GT_KillFirstBoss() {
             return 0
         }
     }
-    
+
     ;等前次戰鬥施放的技能CD完成
     ;ShowTipI("●[Mission2] - Waiting for CD done")
     while(global SkillAsyncLock == 1) {
@@ -275,7 +275,7 @@ BnsDroidMission_GT_KillFirstBoss() {
         ;ShowTip("●[Mission2] - Exception, no found first BOSS")
         return 0
     }
-    
+
     return 1
 }
 
@@ -285,29 +285,29 @@ BnsDroidMission_GT_KillFirstBoss() {
 ;    Mission2 - 尋找一王通道
 ;----------------------------------------------------------------------------
 BnsDroidAction_GT_SearchFirstBossEntry() {
-    
+
     ;先看看正前方是不是目標
     if(BnsDroidAction_GT_SearchFirstBossEntryPattern() == 7) {
         return 1
     }
-    
+
     ;向左後轉大角度
     ;BnsActionRotationDuring(-2.755 * 155, 1)
     ;轉向指定角度
     BnsActionAdjustDirectionOnMap(75)
-    
+
 
     ;左旋尋找
     loop, 20
     {
         turn := BnsDroidAction_GT_SearchFirstBossEntryPattern()
-        
+
         if( turn == 7 ) {
             ;完美定位
             ShowTipI("●[Mission2] - Search first entry Success!")
             return 1
         }
-        
+
         if( turn & 0x04 == 0) {
             ;偏差有點遠，大角度繼續轉頭找
             BnsActionRotationLeftAngle(6)
@@ -332,7 +332,7 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern() {
 
     leftYellow:=-1
     leftBlock:=-1
-    
+
     rightYellow:=-1
     rightBlock:=-1
 
@@ -348,7 +348,7 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern() {
         leftYellow:=findX
         DumpLogD("[BnsDroidAction_GT_SearchFirstBossEntryPattern] leftYellow:" leftYellow)
     }
-    
+
     ;找左門黑色
     sY:=sY + (WIN_BLOCK_HEIGHT * 0.4)
     eY:=sY + (WIN_BLOCK_HEIGHT * 0.5)
@@ -373,7 +373,7 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern() {
         rightYellow:=findX
         DumpLogD("[BnsDroidAction_GT_SearchFirstBossEntryPattern] rightYellow:" rightYellow)
     }
-    
+
     ;找右門黑色
     sY:=sY + (WIN_BLOCK_HEIGHT * 0.4)
     eY:=sY + (WIN_BLOCK_HEIGHT * 0.5)
@@ -398,7 +398,7 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern() {
         DumpLogD("[BnsDroidAction_GT_SearchFirstBossEntryPattern] centerLight:" centerLight)
         DumpLogD("[BnsDroidAction_GT_SearchFirstBossEntryPattern] center:" result)
     }
-    
+
     ShowTipD("[BnsDroidAction_GT_SearchFirstBossEntryPattern] final result:" result)
     return result
 }
@@ -414,18 +414,18 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern_UE3() {
     avg1 := GetAverageColor(sX, sY, WIN_BLOCK_WIDTH, WIN_BLOCK_HEIGHT / 2)
     ;MouseMove sX+ 30,sY + 30
     ;sleep 1000
-    
+
     sX := WIN_CENTER_X - WIN_BLOCK_WIDTH
     avg2 := GetAverageColor(sX, sY, WIN_BLOCK_WIDTH, WIN_BLOCK_HEIGHT / 2)
     ;MouseMove sX+ 30,sY + 30
     ;sleep 1000
-    
+
     sX := WIN_CENTER_X
     avg3 := GetAverageColor(sX, sY, WIN_BLOCK_WIDTH, WIN_BLOCK_HEIGHT / 2)
     ;MouseMove sX+ 30,sY + 30
     ;sleep 1000
-    
-    
+
+
     sX := WIN_CENTER_X + WIN_BLOCK_WIDTH
     avg4 := GetAverageColor(sX, sY, WIN_BLOCK_WIDTH, WIN_BLOCK_HEIGHT / 2)
     ;MouseMove sX+ 30,sY + 30
@@ -438,22 +438,22 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern_UE3() {
 
 
     if avgR1 < 120
-    {    
+    {
         result += 1
     }
 
     if avgR2 > 90
-    {    
+    {
         result += 2
     }
 
     if avgR3 > 90
-    {    
+    {
         result += 4
     }
 
     if avgR4 < 120
-    {    
+    {
         result += 8
     }
 
@@ -470,7 +470,7 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern_UE3() {
 
     ShowTipD("[SearchFirstBossEntryPattern] result:" result ", [" avgR1 ", " avgR2 ", " avgR3 ", " avgR4 "]")
     ;sleep 3000
-    
+
     return result
 }
 
@@ -490,18 +490,18 @@ GT_BOSS1_FIGHTING_SKILL_THREAD() {
 ;################################################################################################################
 BnsDroidMission_GT_KillFinalBoss() {
     ShowTipI("●[Mission3] - Looking for fianl Boss")
-    
+
     BnsActionAdjustCamara(-50, 8)
-    
+
     ;向後轉尋找尾王通道
     if(BnsDroidAction_GT_SearchFinalBossEntry() == 0) {
         BnsDroidMission_GT_Fail("Not detect final BOSS entry, go back dungeon hall")
         return 0
     }
-    
+
     sleep 1000
     ShowTipI("●[Mission3] - Move to final Boss's room")
-    
+
 
     ;移動到傳點
     if(PARTY_MODE == 3){
@@ -515,7 +515,7 @@ BnsDroidMission_GT_KillFinalBoss() {
     if(BnsDroidAction_GT_AdjustFinalBossCorridor() == 0){
         ShowTipW("●[Mission3] - Adjust corridor failed!")
     }
-    
+
     ShowTipI("●[Mission3] - Keep move to fight the final Boss")
     ;移動到尾王
     BnsActionSprint(6000)    ;輕功
@@ -534,7 +534,7 @@ BnsDroidMission_GT_KillFinalBoss() {
     sleep 200
     Send {Space Up}
     sleep 200
-    
+
     BnsActionWalk(1000)
 
 
@@ -573,12 +573,12 @@ BnsDroidMission_GT_KillFinalBoss() {
         while(BnsIsEnemyDetected() > 0  && CommonTimeout == 0) {
             sleep 100
         }
-        
+
         if(CommonTimeout == 1) {
             BnsDroidMission_GT_Fail("Fight timeout, escape final BOSS fighting program")
             return 0
         }
-        
+
         ;註消計時器
         SetTimer, GT_TIMEOUT_NOTIFY_THREAD, delete                ;未超時, 解除超時計時
         SetTimer, GT_FINAL_FIGHTING_SKILL_THREAD, delete        ;取消來不及放的技能計時器(王死太快)
@@ -595,7 +595,7 @@ BnsDroidMission_GT_KillFinalBoss() {
         ;ShowTip("●[Mission2] - Exception, no found first BOSS")
         return 0
     }
-    
+
     return 1
 }
 
@@ -616,7 +616,7 @@ BnsDroidAction_GT_SearchFinalBossEntry() {
     sY:= WIN_BLOCK_HEIGHT * 0.5
     eX:= WIN_CENTER_X + (WIN_BLOCK_WIDTH * 7)
     eY:= WIN_BLOCK_HEIGHT * 4
-    
+
     ;先向右小轉，處理門只在右邊一點點避免繞整圈
     ;DumpLogD("[BnsDroidAction_GT_SearchFinalBossEntry] not found pattern, turn left to search")
     ;BnsActionRotationRightAngle(8)
@@ -625,7 +625,7 @@ BnsDroidAction_GT_SearchFinalBossEntry() {
     BnsActionAdjustDirectionOnMap(80)
 
 
-    
+
     loop, 40 {
         if(FindPixelRGB(sX, sY, eX, eY, 0xD8D7E4, 8) == 1) {
             DumpLogD("[BnsDroidAction_GT_SearchFinalBossEntry] detect Entry, x:" findX ", y:" findY)
@@ -660,7 +660,7 @@ BnsDroidAction_GT_SearchFinalBossEntry() {
 
         sleep 20
     }
-    
+
     DumpLogE("[BnsDroidAction_GT_SearchFinalBossEntry] search done, pattern not found.")
     return 0
 }
@@ -687,7 +687,7 @@ BnsDroidAction_GT_AdjustFinalBossCorridor() {
             BnsActionLateralWalkRight(300)
         }
     }
-    
+
     loop, 30 {
         if(FindPixelRGB(sX, sY, eX, eY, 0xFFFBF2, 10) == 1) {
             if(findX > WIN_CENTER_X + 10) {
@@ -714,10 +714,10 @@ BnsDroidAction_GT_AdjustFinalBossCorridor() {
             }
         }
     }
-    
+
     DumpLogE("[BnsDroidAction_GT_AdjustFinalBossCorridor] search done, pattern not found.")
     return 0
-    
+
 }
 
 ;@Discard
@@ -729,12 +729,12 @@ BnsDroidAction_GT_AdjustFinalBossCorridor2() {
     sY := WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 3)
 
     colorRaw := GetPixelColor(ssX, sY)
-    
+
     R := GetColorRed(colorRaw)
     G := GetColorGreen(colorRaw)
     B := GetColorBlue(colorRaw)
 
-    if(DBUG == 1) 
+    if(DBUG == 1)
         ShowTip("[AdjustFinalBossCorridor] sX" sX ", sY" sY ", color:" pixelColor ", R:" R ", G:" G ", B:" B, sX+10, sY)
 
     if R between 0x00 and 0x50
@@ -747,12 +747,12 @@ BnsDroidAction_GT_AdjustFinalBossCorridor2() {
     sY := WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 3)
 
     colorRaw := GetPixelColor(ssX, sY)
-    
+
     R := GetColorRed(colorRaw)
     G := GetColorGreen(colorRaw)
     B := GetColorBlue(colorRaw)
 
-    if(DBUG == 1) 
+    if(DBUG == 1)
         ShowTip("[AdjustFinalBossCorridor] sX" sX ", sY" sY ", color:" pixelColor ", R:" R ", G:" G ", B:" B, sX+10, sY)
 
     if R between 0x00 and 0x50
@@ -760,7 +760,7 @@ BnsDroidAction_GT_AdjustFinalBossCorridor2() {
         BnsActionLateralWalkRight(300)
     }
 
-    
+
     ;左側尋標定位
     sX := WIN_CENTER_X - (WIN_BLOCK_WIDTH * 5)
     sY := WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 3) - 10
@@ -772,16 +772,16 @@ BnsDroidAction_GT_AdjustFinalBossCorridor2() {
         if(Mod(A_Index, 5) == 0) {
             ssX := sX + A_index
             colorRaw := GetPixelColor(ssX, sY)
-            
+
             R := GetColorRed(colorRaw)
             G := GetColorGreen(colorRaw)
             B := GetColorBlue(colorRaw)
 
-            if(DEBG == 1) 
+            if(DEBG == 1)
                 ShowTip("[AdjustFinalBossCorridor] i:" A_index ", ssX" ssX ", sY" sY ", color:" pixelColor ", R:" R ", G:" G ", B:" B, ssX+10, sY)
 
             if R between 0xF0 and 0xFF
-            {    
+            {
                 if G between 0xF0 and 0xFF
                 {
                     if B between 0xD0 and 0xF0
@@ -801,7 +801,7 @@ BnsDroidAction_GT_AdjustFinalBossCorridor2() {
     ;右側尋標定位
     sX := WIN_CENTER_X + (WIN_BLOCK_WIDTH * 4)
     sY := WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 3) - 10
-    
+
     scan := WIN_BLOCK_WIDTH * 5
 
     loop, %scan%
@@ -809,16 +809,16 @@ BnsDroidAction_GT_AdjustFinalBossCorridor2() {
         if(Mod(A_Index, 5) == 0) {
             ssX := sX + WIN_BLOCK_WIDTH - A_index
             colorRaw := GetPixelColor(ssX, sY)
-            
+
             R := GetColorRed(colorRaw)
             G := GetColorGreen(colorRaw)
             B := GetColorBlue(colorRaw)
 
-            if(DBUG == 1) 
+            if(DBUG == 1)
                 ShowTip("[AdjustFinalBossCorridor] i:" A_index ", ssX" ssX ", sY" sY ", color:" pixelColor ", R:" R ", G:" G ", B:" B, ssX+10, sY)
 
             if R between 0xF0 and 0xFF
-            {    
+            {
                 if G between 0xF0 and 0xFF
                 {
                     if B between 0xD0 and 0xF0
@@ -832,7 +832,7 @@ BnsDroidAction_GT_AdjustFinalBossCorridor2() {
                     }
                 }
             }
-        }    
+        }
     }
 
     return 0
@@ -852,7 +852,7 @@ BnsDroidMission_RewardAndSecret(){
         ShowTipI("●[Mission4] - Open reward box")
         Send f
         sleep 200
-        
+
         PickItems("res\pic_pick_reward")
     }
     else {
@@ -866,7 +866,7 @@ BnsDroidMission_RewardAndSecret(){
             }
             else {
                 ShowTipI("●[Mission4] - Secret store opened")
-                
+
                 ScreenShot()
                 BuyItem("res\pic_buy_secret")
             }
@@ -875,7 +875,7 @@ BnsDroidMission_RewardAndSecret(){
 
     ShowTipI("●[Mission4] - Mission completed")
     sleep 500
-    
+
     ShowTipI("●[Mission4] - Go to next mission cycle")
 }
 

@@ -10,7 +10,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #include libs\PaddleOCR\PaddleOCR.ahk
 #include libs\BnsMemHacker\BnsMemHack.ahk
 
-;!!Importent for PixelGetColor, PixelSearch, value is screen|Window|Client, 
+;!!Importent for PixelGetColor, PixelSearch, value is screen|Window|Client,
 ;if defulat is window, PixelGetColor will return 0x767676 in loop
 ;CoordMode, Pixel, Client
 ;CoordMode, Mouse, Client
@@ -52,7 +52,7 @@ global memHacks := Array()
 
 ;================================================================================================================
 ;================================================================================================================
-;    Mosue Control (系統級API, 應付FPS級的遊戲) 
+;    Mosue Control (系統級API, 應付FPS級的遊戲)
 ;================================================================================================================
 ;================================================================================================================
 ;https://docs.microsoft.com/zh-tw/windows/win32/api/winuser/nf-winuser-mouse_event?redirectedfrom=MSDN
@@ -60,7 +60,7 @@ global memHacks := Array()
 ;滑鼠位置規正
 MousePositionAdjust() {
     ;計算 Screen 座標與 windows 座標偏移量，進行補正
-    
+
     WinGetPos, X, Y, W, H, 劍靈
 
     mouseOffsetX := X    ;偏差補正(手工調的)
@@ -73,17 +73,17 @@ MousePositionAdjust() {
 /*
     click
     sleep 100
-    
+
     Send {Alt down}
     sleep 200
-    
+
     ;移動到螢幕最左上角 0,0 的值置
     DllCall("mouse_event", "UInt", 0x8001, "UInt", 0, "UInt", 0, "UInt", 0, "UPtr", 0)
     sleep 100
 
     ;取得screen 0,0 在視窗中的座標
     MouseGetPos, mouseOffsetX, mouseOffsetY
-    
+
      mouseOffsetX -= 7    ;偏差補正(手工調的)
     mouseOffsetY -= 7   ;偏差補正(手工調的)
     DumpLogI("[MousePositionAdjust] Mouse Offset x:" mouseOffsetX ", y:" mouseOffsetY)
@@ -92,7 +92,7 @@ MousePositionAdjust() {
     sleep 100
 
     Send {Alt up}
-    sleep 100 
+    sleep 100
 */
 }
 
@@ -101,7 +101,7 @@ MousePositionAdjust() {
 MouseMoveA(x, y) {    ;使用 0~65535表示螢幕最左到最右(最上到最下亦同)，需要轉換座標成 pixel 對應(會有換算誤差，盡量以原生的 MouseMove 算視窺內座標比較精準)
     sysX := 65535//A_ScreenWidth
     sysY := 65535//A_ScreenHeight
-    
+
     DllCall("mouse_event", "UInt", 0x8001, "UInt", (x + mouseOffsetX) * sysX, "UInt", (y + mouseOffsetY) * sysY, "UInt", 0, "UPtr", 0)
 }
 
@@ -119,6 +119,60 @@ MouseWheel(wheel, times) {
 }
 
 
+;================================================================================================================
+;    Window Attribute
+;================================================================================================================
+;取得視窗屬性;  [ winTitle ] 視窗 title; [ return ] Array {X,Y,W,H}
+WinGetWindowPos(winTitle) {
+    WinGetPos, x, y, w, h, %winTitle%
+    return { X: x, Y: y, W: w, H: h }
+}
+
+;取得顯示區屬性; [ winTitle ] 視窗 title; [ return ] Array {X,Y,W,H}
+WinGetClientPos(winTitle) {
+    WinGet, hWnd, ID, %winTitle%
+    VarSetCapacity( size, 16, 0 )
+    DllCall( "GetClientRect", UInt, Hwnd, Ptr, &size )		;full client size - x,y always 0
+    DllCall( "ClientToScreen", UInt, Hwnd, Ptr, &size )		;x,y co-oordinates only
+    x := NumGet( size, 0, "Int"), y := NumGet( size, 4, "Int")
+    w := NumGet( size, 8, "Int" ), h := NumGet( size, 12, "Int" )
+    return { X: x, Y: y, W: w, H: h }
+}
+
+;取得Title佔用 px; [ return ] px
+GetWinTitlePx() {
+    window := WinGetWindowPos(res_game_window_title)
+    client := WinGetClientPos(res_game_window_title)
+
+    return client.Y - window.Y
+}
+
+;取得左右邊框佔用 px; [ return ] px
+GetWinBoardPx() {
+    window := WinGetWindowPos(res_game_window_title)
+    client := WinGetClientPos(res_game_window_title)
+
+    return client.X - window.X
+}
+
+;視窗中心 X, Y
+GetWinCenterPos() {
+    client := WinGetClientPos(res_game_window_title)
+    return { X: floor(client.W / 2), Y: floor(client.H / 2) }
+}
+
+;1/4寬高 X, Y
+GetWinQuarterPos() {
+    client := WinGetClientPos(res_game_window_title)
+    return { X: floor(client.W / 4), Y: floor(client.H / 4) }
+}
+
+;分割塊寬高 W, H
+GetWinBlock(wSplit := 32, hSplit := 16) {
+    client := WinGetClientPos(res_game_window_title)
+    return { W: floor(client.W / wSplit), H: floor(client.H / hSplit) }
+}
+
 
 ;================================================================================================================
 ;    Graphic
@@ -133,7 +187,7 @@ FindPic(x0, y0, x1, y1, s, file) {
     ImageSearch, getX, getY, x0, y0, x1, y1, *%s% %A_WorkingDir%\%file%
     global findX := getX
     global findY := getY
-    
+
     if(DBUG == 1) {
         ShowTipD("[FindPic] ErrorLevel: " ErrorLevel ",  x:" getX ", y:" getY  "  [ src:" file ", lv:" s " ]")
     }
@@ -153,7 +207,7 @@ FindPic(x0, y0, x1, y1, s, file) {
 FindPicList(x0, y0, x1, y1, s, filelist) {
     Loop %filelist%*.png                ;列出工作目錄下所有 file[n].png
     {
-    
+
         ;loop 篩出來的只有檔名，所以先分離輸入list帶的路徑，並補上
         SplitPath, fileList,,dir
         file = %dir%\%A_LoopFileName%
@@ -166,7 +220,7 @@ FindPicList(x0, y0, x1, y1, s, filelist) {
 }
 
 ;----------------------------------------------------------------------------------------------------------------
-;    PixelSearch (以前景畫面區域找色) 
+;    PixelSearch (以前景畫面區域找色)
 ;----------------------------------------------------------------------------------------------------------------
 ;在指定區域中尋找指定 RBG 的 pixel;  [ x0 ] 起始X;  [ y0 ] 起始Y;  [ x1 ] 結束X;  [ y1 ] 結束Y;  [ colorHex ] RGB Hex;  [ s ] 容許誤值;  [ return ] 0:沒找到 1:找到 (坐標以 global findX, findX 取得)
 FindPixelRGB(x0, y0, x1, y1, colorHex, s) {
@@ -217,13 +271,13 @@ GetColorGreen(colorHex) {
 }
 
 GetColorBlue(colorHex) {
-    return colorHex & 0xFF 
+    return colorHex & 0xFF
 }
 
 GetColorGray(colorHex) {
     R := (colorHex >> 16) & 0xFF
     G := (colorHex >> 8) & 0xFF
-    B := colorHex & 0xFF 
+    B := colorHex & 0xFF
 
     Gray := floor((R*299 + G*587 + B*114 + 500) / 1000)
     ; Gray := floor(((R*0.299) + (G*0.587) + (B*0.114)) * 255)
@@ -247,8 +301,8 @@ GetAverageColor(sX, sY, widthX, heightY) {
     i := 1
 
     loop, 3 {
-        getY := sY + (pY * A_index)        
-        
+        getY := sY + (pY * A_index)
+
         loop 3 {
             getX := sX + (pX * A_Index)
 
@@ -260,16 +314,16 @@ GetAverageColor(sX, sY, widthX, heightY) {
             i++
         }
     }
-    
+
     avgR := 0
     avgG := 0
-    avgB := 0 
-    
+    avgB := 0
+
     for i, pColor in pArray    {
         R := (pColor >> 16) & 0xFF
         G := (pColor >>  8) & 0xFF
-        B :=  pColor        & 0xFF 
-        
+        B :=  pColor        & 0xFF
+
         avgR += R
         avgG += G
         avgB += B
@@ -278,13 +332,13 @@ GetAverageColor(sX, sY, widthX, heightY) {
             ShowTipD("i:" i ", average color:" avgR )
         }
     }
-    
+
     avgR := avgR / 9
     avgG := avgG / 9
     avgB := avgB / 9
-    
+
     avgColor := ((avgR << 16) | (avgG << 8) | avgB)
-    
+
     if(VDBUG == 1) {
         ShowTipD("[GetAverageColor] average color: 0x" ToBase(avgColor,16))
     }
@@ -294,8 +348,8 @@ GetAverageColor(sX, sY, widthX, heightY) {
 
 
 ;Base converter
-ToBase(n,b){  
-    return (n < b ? "" : ToBase(n//b,b)) . ((d:=Mod(n,b)) < 10 ? d : Chr(d+55))  
+ToBase(n,b){
+    return (n < b ? "" : ToBase(n//b,b)) . ((d:=Mod(n,b)) < 10 ? d : Chr(d+55))
 }
 
 
@@ -340,7 +394,7 @@ RegionSearch(c1, c2:=0, s1:=5, s2:=5) {
                             chk := chk + 1
                         }
                     }
-                    
+
                     if(chk == 5) {
                         winAttr.push(tx + ((stage == 1) ? -5 : 5))
                         winAttr.push(ty)
@@ -391,9 +445,9 @@ StrCfgTrim(str) {
 DSleep(ms=1)
 {
     DllCall("Winmm.dll\timeBeginPeriod", "UInt", 3)
-        
+
     DllCall("Sleep", "UInt", ms)
-    
+
     DllCall("Winmm\timeEndPeriod", "UInt", 3)  ; Should be called to restore system to normal.
 }
 
@@ -540,7 +594,7 @@ DumpFileOpen() {
 DumpFileClose() {
     global plogfile
     global LOGABLE
-    
+
     if(DUMPLOG == 1 && LOGABLE > 0) {
         pLogfile.close()
     }

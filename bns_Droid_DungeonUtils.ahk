@@ -17,7 +17,7 @@ BnsDroidSkill_commonPrepare() {
     Send +{e}
     sleep 100
     ;"`" 使用 星, "`" backtick 需要特殊寫法
-    Send {``}    
+    Send {``}
     sleep 100
 }
 
@@ -26,7 +26,7 @@ BnsDroidSkill_commonPrepare() {
 BnsDroidSkill_ProtectInFighting(role) {
 ;role: 0:disable 1:blademaster 2:kungfufighter 3:forcemaster 4:summoner 5:assassin 6:destoryer 7:swordmaster 8:warlock 9:soulfighter 10:shooter 11:warrior 12:archer 13:thunderer 14:dualblader
 ;職業: 0:不限定    1:劍 2:拳 3:氣 4:召 5:刺 6:力 7:燐劍 8:咒 9:乾坤 10:槍 11:鬥 12:弓 13:天道 14:雙劍
-    
+
     switch role
     {
         case "0":    ;不使用
@@ -113,10 +113,10 @@ BnsDroidAction_FaceToBoss() {
         if(BnsIsEnemyDetected() > 0) {
             return 1
         }
-        
+
         BnsActionRotationLeftAngle(3)
     }
-    
+
     ;沒找到，歸位
     BnsActionRotationRightAngle(60)
 
@@ -126,7 +126,7 @@ BnsDroidAction_FaceToBoss() {
         if(BnsIsEnemyDetected() > 0) {
             return 1
         }
-        
+
         BnsActionRotationRightAngle(3)
     }
 
@@ -147,7 +147,7 @@ BnsDungeonLeave(dist) {
         loop, 4 {
             if(FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 130, "res\pic_dungeon_option") == 1) {
                 DumpLogD("[BnsDungeonLeave] found dungeon exit")
-                
+
                 ;接收任務獎勵
                 Send f
                 sleep 1000
@@ -160,7 +160,7 @@ BnsDungeonLeave(dist) {
 
                 Send f
                 sleep 2000
-                
+
                 ;點龍脈離開
                 Send f
                 sleep 3000
@@ -182,7 +182,7 @@ BnsDungeonLeave(dist) {
     }
     else {
         DumpLogD("[BnsDungeonLeave] found dungeon exit")
-        return 0 
+        return 0
     }
 }
 
@@ -193,7 +193,7 @@ BsnLookingExit() {
     if(BsnLookingExitDirection() == 1) {
         return BsnLookingExitDistance()
     }
-    
+
     return 0
 }
 
@@ -202,9 +202,9 @@ BsnLookingExitDirection() {
     sY:= WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 7)
     eX:= WIN_CENTER_X + (WIN_BLOCK_WIDTH * 8)
     eY:= WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 1)
-    
+
     missRetry:=0
-    
+
     BnsActionRotationRightAngle(15)
 
     loop, 40 {
@@ -246,7 +246,7 @@ BsnLookingExitDirection() {
         }
 
         sleep 60
-        ;ShowTip("↖", findX, findY)            
+        ;ShowTip("↖", findX, findY)
     }
 
     return 0
@@ -261,12 +261,12 @@ BsnLookingExitDistance() {
     ;拉到垂直視角
     BnsActionAdjustCamara(-50, 0)
     sleep 200
-    
+
     ;調整俯角計算距離
     loop {
         MouseMoveR(0, -10)
         sleep 30
-        
+
         if(FindPixelRGB(sX, sY, eX, eY, 0x00EDF4, 0x30) == 1) {
             ;以直線踓離計算，龍脈為0%，場中為100%
 
@@ -307,7 +307,7 @@ BsnLookingExitDistance() {
             return dist
         }
     }
-    
+
 }
 
 
@@ -316,9 +316,9 @@ BsnLookingExitX() {
     sY:= WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 7)
     eX:= WIN_CENTER_X + (WIN_BLOCK_WIDTH * 8)
     eY:= WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 1)
-    
+
     missRetry:=0
-    
+
     BnsActionRotationRightAngle(15)
 
     loop, 40 {
@@ -356,7 +356,7 @@ BsnLookingExitX() {
                     ret:=2
                 }
 
-                
+
                 ShowTipD("[BsnLookingExit] targeted distance " ret)
                 return ret
             }
@@ -374,7 +374,7 @@ BsnLookingExitX() {
         }
 
         sleep 60
-        ;ShowTip("↖", findX, findY)            
+        ;ShowTip("↖", findX, findY)
     }
 
     return 0
@@ -390,10 +390,10 @@ BnsDungeonRetreat() {
         sleep 2000
 
         ret:=BnsWaitMapLoadDone()
-        
+
         sleep 1000
         BnsActionWalk(200)
-        
+
         return ret
     }
 }
@@ -420,9 +420,9 @@ LookingRewardBox() {
                 return 1
             }
         }
-        
+
         BnsActionRotationRightAngle(3)
-        
+
         loop, 3
         {
             if(FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 24, "res\pic_pick_box") == 0) {
@@ -433,7 +433,7 @@ LookingRewardBox() {
             }
         }
     }
-    
+
     return 0
 }
 
@@ -443,7 +443,7 @@ LookingRewardBox() {
 ;----------------------------------------------------------------------------
 PickItems(filelist) {
     ShowTipI("●[System] - pick item:" filelist)
-    
+
     loop, 3
     {
         Loop, %filelist%*.png                ;列出工作目錄下所有 file[n].png
@@ -457,23 +457,23 @@ PickItems(filelist) {
 
                 Send {Alt down}
                 sleep 200
-                
+
                 MouseMove findX + 20, findY + 20
                 sleep 200
 
                 click, right
                 sleep 200
-                
+
                 Send {Alt up}
                 sleep 200
-                
+
                 Send {y}    ;某些東西會詢問
                 sleep 200
 
             }
         }
     }
-    
+
     Send {s Down}
     sleep 50
     Send {s Up}
@@ -487,12 +487,12 @@ PickItems(filelist) {
 LookingSecretMerchant() {
     sX := WIN_CENTER_X - (WIN_BLOCK_WIDTH * 8)
     sY := WIN_CENTER_Y - (WIN_BLOCK_HEIGHT * 5)
-    
+
     if(FindPixelRGB(sX, sY, sX + WIN_BLOCK_WIDTH * 16, sY + WIN_BLOCK_HEIGHT + WIN_BLOCK_HEIGHT * 5, 0x45be58, 0x10) == 1) {
         ShowTipI("●[System] - found Secret Merchant!!")
         return 1
     }
-    
+
     ShowTipI("●[System] - not found Secret Merchant")
     return 0
 }
@@ -507,9 +507,9 @@ VisitSecretStore() {
     loop, 20
     {
         if(FindPixelRGB(sX, sY, sX + WIN_BLOCK_WIDTH * 20, sY + WIN_BLOCK_HEIGHT * 8, 0x45be58, 0x10) == 1) {
-            
+
             ShowTipD("[VisitSecretStore] find x:" findX)
-            
+
             if(findX > WIN_CENTER_X + 5) {    ;目標在右邊
                 if((findX - WIN_CENTER_X) > WIN_BLOCK_WIDTH) {
                     DumpLogD("[VisitSecretStore] turn right angle 8")
@@ -555,9 +555,9 @@ VisitSecretStore() {
                 return 1
             }
         }
-        
+
         BnsActionRotationLeftAngle(3)
-        
+
         loop, 3 {
             if(FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 120, "res\pic_secret_visit") == 0) {
                 BnsActionRotationLeftAngle(1)
@@ -569,10 +569,10 @@ VisitSecretStore() {
                 return 1
             }
         }
-        
+
         BnsActionRotationRightAngle(3)
         sleep 200
-        
+
         BnsActionWalk(500)
     }
 
@@ -594,16 +594,16 @@ BuyItem(filelist) {
 
             Send {Alt down}
             sleep 200
-            
+
             MouseMove findX + 20, findY + 20
             sleep 200
 
             click, right
             sleep 200
-            
+
             Send y
             sleep 200
-            
+
             Send {Alt up}
             sleep 200
         }

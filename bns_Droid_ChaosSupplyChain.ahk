@@ -26,10 +26,10 @@ Class BnsDroidChaosSupplyChain {
     SPECIAL_STAGE_HANDLE := 0    ;
 
     FIGHTING_MODE := 0      ;0:specific, 1:all
-    
-    FIGHTING_MEMBERS := "1"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
+
+    FIGHTING_MEMBERS := "1"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member
 
 
     ;戰鬥成員狀態
@@ -37,14 +37,14 @@ Class BnsDroidChaosSupplyChain {
 
 
     ;是否完成特殊機制, 只在 SPECIAL_STAGE_HANDLE = 1 作用
-    isStageSpecialDone := 0    
+    isStageSpecialDone := 0
 
 
 
 ;================================================================================================================
 ;█ Interface
 ;================================================================================================================
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 取得 cp 設定檔 ****
     ;------------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ Class BnsDroidChaosSupplyChain {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 廣場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
         return BnsOuF8DefaultGoInDungeon(2, 0)    ;封魔進場, 不確認過圖
     }
@@ -69,12 +69,12 @@ Class BnsDroidChaosSupplyChain {
     ;Droid script stat; @return - 1: success; 0: failed
     start() {
         this.isStageSpecialDone := 0    ;重置特殊機制 flag
-        
+
         switch this.FIGHTING_MODE
         {
             case 0:
                 return this.runnableSpecific()
-            
+
             case 1:
                 return this.runnableAll()
         }
@@ -130,7 +130,7 @@ Class BnsDroidChaosSupplyChain {
         ;對戰尾王
         loop {
             ret := this.runStageFightFinalBoss()
-            
+
             if(ret == 0) {    ;handle die and retry
                 ShowTipI("●[Mission4] - stage retry to fight final Boss")
                 sleep 15000 ;等確定死透
@@ -149,7 +149,7 @@ Class BnsDroidChaosSupplyChain {
         if(ret == 2) {    ;timeout
             return 0
         }
-    
+
         return 1    ;clear
 
     }
@@ -176,16 +176,16 @@ Class BnsDroidChaosSupplyChain {
     ;Stage1; @return - 1: success; 0: failed
     runStageOpenGate() {
         ShowTipI("●[Mission1] - Open Gate")
-        
+
         BnsActionWalkToPosition(-36311.570, 3058.332, 0x1)  ;綠膜前
-        
+
         loop 4 {
 
             switch A_Index
             {
                 case 1:
                     BnsActionWalkToPosition(-37742.347, 3211.656, 0x4)  ;起始點
-                
+
                 case 2:
                     BnsActionWalkToPosition(-37743.964, 6829.596)   ;中間點
 
@@ -200,19 +200,19 @@ Class BnsDroidChaosSupplyChain {
             ; BnsStartHackSpeed()
 
             sleep 5000
-    
+
             ;進入戰鬥
             if(BnsIsEnemyDetected() > 0) {
                 ShowTipI("●[Mission1] - stage" A_index " Fighting")
-    
+
                 if(BnsIsEnemyClear(1000, 90) == 1) {
                     sleep 100
-    
+
                     ; BnsStopCheatEngiwneSpeed()
-    
+
                     ;自動戰鬥關閉
                     BnsStopAutoCombat()
-    
+
                     ShowTipI("●[Mission1] - stage" A_index " Completed")
                     sleep 1000
                 }
@@ -222,12 +222,12 @@ Class BnsDroidChaosSupplyChain {
                     ShowTipE("●[Mission1] - Exception, timeout")
                     return 0
                 }
-    
+
             }
             else {
                 sleep 100
                 ; BnsStopHackSpeed()
-    
+
                 ;自動戰鬥關閉
                 BnsStopAutoCombat()
 
@@ -237,7 +237,7 @@ Class BnsDroidChaosSupplyChain {
                     ShowTipE("●[Mission1] - Exception, not found enermy")
                     return 0
                 }
-    
+
 
                 ; if(A_index < 4) {
                 ;     BnsActionAdjustDirectionOnMap(90)
@@ -247,10 +247,10 @@ Class BnsDroidChaosSupplyChain {
                 ; }
             }
         }
-        
+
         return 1
     }
-    
+
 
     ;------------------------------------------------------------------------------------------------------------
     ;■ 第二階段: 對戰一王(花媽)
@@ -282,7 +282,7 @@ Class BnsDroidChaosSupplyChain {
 
                 ;預留撿箱時間
                 sleep 15<d00
-                
+
                 ;自動戰鬥關閉
                 BnsStopAutoCombat()
 
@@ -306,7 +306,7 @@ Class BnsDroidChaosSupplyChain {
             return 0
         }
 
-        
+
         BnsActionWalkToPosition(-35683.546, 11678.355)
 
         return 1
@@ -319,7 +319,7 @@ Class BnsDroidChaosSupplyChain {
     ;Stage3; @return - 1: success; 0: failed
     runStageClearLastCorridor() {
         ShowTipI("●[Mission3] - Clear last corridor")
-        
+
         BnsActionWalkToPosition(-33926.093, 11609.183, 0x1)
 
         loop 3 {
@@ -397,7 +397,7 @@ Class BnsDroidChaosSupplyChain {
         ;自動戰鬥開啟
         BnsStartAutoCombat()
         sleep 5000
-        
+
         ; BnsStartHackSpeed()
 
         ;進入戰鬥
@@ -415,7 +415,7 @@ Class BnsDroidChaosSupplyChain {
             if(fight == 1) {    ;clear
                 ;自動戰鬥關閉
                 BnsStopAutoCombat()
-                
+
                 ;註消計時器
                 ; SetTimer, CS_FINAL_FIGHTING_SKILL_THREAD, delete
 
@@ -431,7 +431,7 @@ Class BnsDroidChaosSupplyChain {
 
                 ;角色死亡
                 ShowTipI("●[Mission4] - stage Falure, charactor dead")
-            
+
                 sleep 4000
                 Send {4 2}    ;復活
                 sleep 3000
@@ -485,26 +485,26 @@ Class BnsDroidChaosSupplyChain {
         ;執行 pickReward
         fn := func(this.pickReward.name).bind(this)
 
-        BnsPcTeamMemberAction(fn, , 1, 0)  ; 回傳執行mId, 不切回 leader 
+        BnsPcTeamMemberAction(fn, , 1, 0)  ; 回傳執行mId, 不切回 leader
 
         ; sleep 2000    ;等待最後一員龍脈動畫
-    
+
         ; this.startTeamAutoCombat()    ;TODO
         sleep 5000    ;等待撿箱
-        
+
         BnsStopHackSpeed()
 
         ;如果不是全模式, 掛件們去尾王房撿箱
-        ; fn := func("BnsDroidChaosBlackShenmu.takeRedDragonPulse").bind(BnsDroidChaosBlackShenmu, 2)    
+        ; fn := func("BnsDroidChaosBlackShenmu.takeRedDragonPulse").bind(BnsDroidChaosBlackShenmu, 2)
         ; BnsPcTeamMemberAction(fn,StrSplit("3,4", ","))
         ; sleep 6000
 
         ; this.startTeamAutoCombat("3,4")    ;TODO
         ; sleep 5000    ;等待撿箱
-    
+
         ; fn := func("BnsOuF8GobackLobby").bind(0)    ;0: 不確認是否回等候成功
         ; BnsPcTeamMemberAction(fn,StrSplit)    ;全員回到等候室
-        
+
         ; return
     }
 
@@ -516,14 +516,14 @@ Class BnsDroidChaosSupplyChain {
 ;================================================================================================================
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 搭乘龍脈 
+    ;■ 搭乘龍脈
     ;------------------------------------------------------------------------------------------------------------
     ;Take dragon pulse; #cate - 1: BOSS1; 2: Final BOSS
     takeRedDragonPulse(cate) {
         DumpLogD("●[Action] - " A_ThisFunc)
 
         switch cate
-        {        
+        {
             case 1:        ;小王龍脈
                 BnsActionWalkToPosition(-35791.628, 2572.629)
                 send {f}
@@ -532,12 +532,12 @@ Class BnsDroidChaosSupplyChain {
                 ; BnsActionLateralWalkRight(2800)
                 ; BnsActionSprint(3400)
                 ; BnsActionLateralWalkLeft(2100)
-                
+
                 ; BnsActionRotationDegree180()
                 ; sleep 5000    ;需要這個delay 防止上一動的 movsemove 造成視角偏轉
-        
+
             case 2:     ;尾王龍脈
-                BnsActionWalkToPosition(-35786.531, 3056.019)                
+                BnsActionWalkToPosition(-35786.531, 3056.019)
                 Send {f}
         }
     }
@@ -584,7 +584,7 @@ Class BnsDroidChaosSupplyChain {
                 ShowTipI("●[Action] - pickReward " mId " is dead, do resurrection and go back to pick reward")
             }
             else {    ;角色存活, 無需處理
-                return     
+                return
             }
         }
 
@@ -688,7 +688,7 @@ Class BnsDroidChaosSupplyChain {
         ;使用星
         send {``}
         sleep 100
-        
+
         send {tab}
     }
 
@@ -718,7 +718,7 @@ Class BnsDroidChaosSupplyChain {
 
 
         ;迴避
-        switch BnsPcGetCurrentDid() 
+        switch BnsPcGetCurrentDid()
         {
             case 1:
                 send {q}
@@ -770,7 +770,7 @@ Class BnsDroidChaosSupplyChain {
                 ; BnsStartStopAutoCombat()    ;start
 
             case 4:
-            
+
         }
 
 
@@ -794,7 +794,7 @@ Class BnsDroidChaosSupplyChain {
 
     ;------------------------------------------------------------------------------------------------------------
     ;■ 戰鬥脫離
-    ;* @return - 0: no action; 1~n: escape 
+    ;* @return - 0: no action; 1~n: escape
     ;------------------------------------------------------------------------------------------------------------
     isFightEscape() {
         DumpLogD("●[Status] - " A_ThisFunc)
@@ -811,10 +811,10 @@ Class BnsDroidChaosSupplyChain {
 
         deadCount := 0
         fighters := StrSplit(FIGHTING_MEMBERS, ",")
-        
+
         ;//TODO應該記住目前是誰，哪個桌面
         currentFighter := BnsPcGetCurrentDid()
-        
+
         DumpLogD("●[Status] - " A_ThisFunc ", DBG currentFighter=" currentFighter)
         DumpLogD("●[Status] - " A_ThisFunc ", DBG " this.fighterState[1] "," this.fighterState[2] "," this.fighterState[3] "," this.fighterState[4])
 
@@ -827,7 +827,7 @@ Class BnsDroidChaosSupplyChain {
             this.fighterState[currentFighter] := (this.fighterState[currentFighter] != 0) ? 5 : 0
         }
 
-        
+
         if(this.fighterState[currentFighter] == 0) {    ;確認死透了
             ;瓜瓜附身者死掉後換下一個替補(畫面切過去, 因為瓜瓜太廢需要活著的隊員維持瓜瓜判斷
             For i, f in fighters
@@ -852,7 +852,7 @@ Class BnsDroidChaosSupplyChain {
         if(deadCount == fighters.length()) {    ;全部死光
             return -1
         }
-        
+
         return 0
     }
 

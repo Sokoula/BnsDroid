@@ -26,11 +26,11 @@ Class BnsDroidFourInOne {
     SPECIAL_STAGE_HANDLE := 0    ;
 
     FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
-    
-    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2"    ;action member 
-    ; FIGHTING_MEMBERS := "1"    ;action member 
+
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member
+    ; FIGHTING_MEMBERS := "1,2"    ;action member
+    ; FIGHTING_MEMBERS := "1"    ;action member
 
     ;戰鬥成員狀態(array)
     fighterState := [1,1,1,1]
@@ -43,7 +43,7 @@ Class BnsDroidFourInOne {
 ;================================================================================================================
 ;█ Interface
 ;================================================================================================================
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 取得 cp 設定檔 ****
     ;* @return - .cp file; empty means not used.
@@ -55,7 +55,7 @@ Class BnsDroidFourInOne {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 廣場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
 
     }
@@ -113,7 +113,7 @@ Class BnsDroidFourInOne {
         ;------------------------------------------------------------------------------------
         ; 安息庭院
         ;------------------------------------------------------------------------------------
-        
+
         ;團隊進本
         fn := func(this.nativeToDungeon.name).bind(this, 1)
         BnsPcTeamMemberAction(fn, BnsPcGetPartyMemberList())
@@ -182,7 +182,7 @@ Class BnsDroidFourInOne {
 
         ;4. 打王
         this.startTeamAutoCombat()
-        
+
         ;5. 打手離開副本
         loop {
             if(this.getBossBloodPercent() < 20) {
@@ -203,12 +203,12 @@ Class BnsDroidFourInOne {
     runStageEnding() {
         ;執行 pickReward
         ; fn := func(this.pickReward.name).bind(this)
-        ; BnsPcTeamMemberAction(fn, , 1, 0)  ; 回傳執行mId, 不切回 leader 
+        ; BnsPcTeamMemberAction(fn, , 1, 0)  ; 回傳執行mId, 不切回 leader
         ShowTipI("●[Mission5] - pick reward")
 
         this.pickReward()
         ShowTipI("●[Mission5] - Mission completed")
-        
+
         sleep 2000
         return 1
     }
@@ -256,7 +256,7 @@ Class BnsDroidFourInOne {
     ;■ 安息庭院 - 導電
     ;------------------------------------------------------------------------------------------------------------
     actionLinkCurrent() {
-        
+
         TYPEA := "1,3,2,4,5,6"
         TYPEB := "1,2,3,4,6,5"
         TYPEC := "1,2,4,3,6,5"
@@ -333,7 +333,7 @@ Class BnsDroidFourInOne {
     ;■ 安息庭院 - 判斷導電光鍊類別
     ;------------------------------------------------------------------------------------------------------------
     judgeLightLink(flowers := "2,3") {
-        ;   5: -45290, 95189        6: -43800, 95195 
+        ;   5: -45290, 95189        6: -43800, 95195
         ;   3: -45290, 93695        4: -43800, 93690
         ;   1: -45290, 92170        2: -43800, 92189
 
@@ -426,7 +426,7 @@ Class BnsDroidFourInOne {
     ;------------------------------------------------------------------------------------------------------------
     startTeamAutoCombat(mIds := 0) {
         midsArray := (!isObject(mIds)) ? StrSplit(mIds, ",") : mIds
-        
+
         fn := func("BnsStartAutoCombatSpeed")
         BnsPcTeamMemberAction(fn, midsArray)    ;全員開始自動戰鬥
     }
@@ -456,7 +456,7 @@ Class BnsDroidFourInOne {
         ret := 0
         disengage := 0
         tick := A_TickCount
-        
+
 
         loop {
             ;角色死亡
@@ -516,10 +516,10 @@ Class BnsDroidFourInOne {
         return floor(this.getTargetBlood() / GetMemoryHack().getMainTargetBloodFull() * 100)
     }
 
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 戰鬥脫離
-    ;* @return - 0: no action; 1~n: escape 
+    ;* @return - 0: no action; 1~n: escape
     ;------------------------------------------------------------------------------------------------------------
     isFightEscape() {
 

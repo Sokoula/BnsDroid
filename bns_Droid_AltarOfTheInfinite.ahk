@@ -27,10 +27,10 @@ Class BnsDroidAltarInfinite {
     SPECIAL_STAGE_HANDLE := 0    ;
 
     FIGHTING_MODE := 0      ;0:specific, 1:all
-    
-    FIGHTING_MEMBERS := "1"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
+
+    FIGHTING_MEMBERS := "1"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member
 
 
     ;戰鬥成員狀態
@@ -38,7 +38,7 @@ Class BnsDroidAltarInfinite {
 
 
     ;是否完成特殊機制, 只在 SPECIAL_STAGE_HANDLE = 1 作用
-    isStageSpecialDone := 0    
+    isStageSpecialDone := 0
 
     ;變身cd等待時間(狗之類)
     hensin := 0
@@ -46,7 +46,7 @@ Class BnsDroidAltarInfinite {
 ;================================================================================================================
 ;█ Interface
 ;================================================================================================================
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 取得 cp 設定檔 ****
     ;------------------------------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ Class BnsDroidAltarInfinite {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 廣場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
         return BnsOuF8DefaultGoInDungeon(1, 0)    ;封魔進場, 不確認過圖
     }
@@ -71,12 +71,12 @@ Class BnsDroidAltarInfinite {
     ;Droid script stat; @return - 1: success; 0: failed
     start() {
         this.isStageSpecialDone := 0    ;重置特殊機制 flag
-        
+
         switch this.FIGHTING_MODE
         {
             case 0:
                 return this.runnableSpecific()
-            
+
             case 1:
                 return this.runnableAll()
         }
@@ -198,11 +198,11 @@ Class BnsDroidAltarInfinite {
         ShowTipI("●[Mission1] - Go incense burner")
 
         BnsActionSprintToPosition(14878, 32, 0x1)  ;階梯前
-        BnsActionSprintToPosition(12619, 20, 0x4)  ;斷崖前 
-        
+        BnsActionSprintToPosition(12619, 20, 0x4)  ;斷崖前
+
         BnsActionAdjustDirection(180)
         BnsActionGliding(20000, 1)
-        
+
         BnsActionSprintToPosition(5917, 144)    ;門前開戰點
         BnsStartHackSpeed()
         BnsStartAutoCombat()
@@ -215,7 +215,7 @@ Class BnsDroidAltarInfinite {
 
         BnsActionSprintToPosition(-4490, 116)   ;香爐前
         BnsActionAdjustDirection(159)
-        
+
         sleep 6000  ;狗拳使用
 
         sleep 500
@@ -230,7 +230,7 @@ Class BnsDroidAltarInfinite {
             ShowTipI("●[Mission1] - Detect dragon pulse A")
             return 2
         }
-        
+
         BnsActionSprintToPosition(-4050, 195)    ;一王龍脈點
         sleep 1000
 
@@ -309,7 +309,7 @@ Class BnsDroidAltarInfinite {
 
         BnsStartHackSpeed()
         BnsActionWalkToPosition(-4147, 12440,,10000)     ;第二香爐
-        
+
         if(this.hensin) {
             sleep 40000 ;狗狗變身
         }
@@ -329,18 +329,18 @@ Class BnsDroidAltarInfinite {
 
         ShowTipI("●[Mission3] - dragon pulse not found, prepare to clear area")
         BnsActionSprintToPosition(-3180, 11251,,10000)     ;第二香爐開戰點
-        
+
         ShowTipI("●[Mission3] - Fighting...")
         BnsStartAutoCombat()
         BnsIsEnemyClear(1000, 60, func(this.actionEscape.name).bind(this, 0))
         BnsStopAutoCombat()
-        
+
         BnsStartAutoCombat()
         BnsIsEnemyClear(1000, 30)
         BnsStopAutoCombat()
 
         BnsActionSprintToPosition(-6359, 11390,,10000)     ;第二香爐守門怪開戰點
-        
+
         BnsStartAutoCombat()
         if(BnsIsEnemyClear(1000, 30) != 1) {
             BnsStopAutoCombat()
@@ -349,7 +349,7 @@ Class BnsDroidAltarInfinite {
 
         BnsStopAutoCombat()
         BnsStopHackSpeed()
-        
+
         ShowTipI("●[Mission3] - Completed")
         return 1
     }
@@ -368,7 +368,7 @@ Class BnsDroidAltarInfinite {
         BnsStartAutoCombat()
         BnsIsEnemyClear(1000, 600,, func(this.actionEscape.name).bind(this, 1))
         BnsStopAutoCombat()
-        
+
         BnsActionWalkToPosition(-9750, 10890)    ;右引戰點
         ;sleep 3000      ;等待聚怪
         BnsStartAutoCombat()
@@ -410,7 +410,7 @@ Class BnsDroidAltarInfinite {
         BnsIsEnemyClear(1000, 600)
         BnsStopAutoCombat()
 
-        
+
         BnsActionWalkToPosition(-10113, 11235)      ;室內2樓出口走廊前
         BnsActionWalkToPosition(-9476, 11103)       ;室內2樓出口走廊中
         BnsActionWalkToPosition(-9348, 7696)        ;室內2樓出口走廊外
@@ -499,7 +499,7 @@ Class BnsDroidAltarInfinite {
         BnsStopHackSpeed()
         ShowTipI("●[Mission6] - Completed")
 
-        
+
         if(this.isBidding() == 1) {
             ShowTipI("●[Action] - Bidding begin")
             loop {
@@ -672,7 +672,7 @@ Class BnsDroidAltarInfinite {
                 }
 
             case 2:         ;尾王結束戰鬥(殘血會莫名出現一次脫戰判定, 需要加血量下去判斷才不會誤判)
-                ShowTipD("●[Action] - " A_ThisFunc ", blood: " GetMemoryHack().getMainTargetBlood() ", isNotBattle: " BnsIsLeaveBattle())    
+                ShowTipD("●[Action] - " A_ThisFunc ", blood: " GetMemoryHack().getMainTargetBlood() ", isNotBattle: " BnsIsLeaveBattle())
                 if(BnsIsLeaveBattle() == 1 && (GetMemoryHack().getMainTargetBlood() < 1 || GetMemoryHack().getMainTargetBlood() >= 6615000)) {
                     return 1
                 }
@@ -688,7 +688,7 @@ Class BnsDroidAltarInfinite {
     ;■ 戰鬥中迴避卡點
     ;* @return - none
     ;------------------------------------------------------------------------------------------------------------
-    
+
 
 
 ;================================================================================================================
@@ -697,7 +697,7 @@ Class BnsDroidAltarInfinite {
 
     ;------------------------------------------------------------------------------------------------------------
     ;■ 戰鬥脫離
-    ;* @return - 0: no action; 1~n: escape 
+    ;* @return - 0: no action; 1~n: escape
     ;------------------------------------------------------------------------------------------------------------
     isFightEscape() {
         DumpLogD("●[Status] - " A_ThisFunc)

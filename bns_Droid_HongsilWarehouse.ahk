@@ -12,7 +12,7 @@ global HW_PickRewardsSecond := 4
 
 
 ;================================================================================================================
-;    █ Interface - Get Character Profiles 
+;    █ Interface - Get Character Profiles
 ;================================================================================================================
 BnsDroidGetCP_HongsilWarehouse() {
     return "HongsilWarehouse.cp"
@@ -32,11 +32,11 @@ BnsDroidNavigation_HongsilWarehouse() {
 
             BnsActionLateralWalkRight(1600)
             BnsActionRandomConfuseMove(3400)
-        } 
+        }
         else {
             ;倒退到入口
             BnsActionLateralWalkLeft(1700)
-            
+
             Send {s down}
             sleep 10000
             Send {s up}
@@ -56,7 +56,7 @@ BnsDroidNavigation_HongsilWarehouse() {
             if(BnsWaitMapLoadDone() == 0) {
                 return 0
             }
-            
+
             return 1
         }
         else {
@@ -71,7 +71,7 @@ BnsDroidNavigation_HongsilWarehouse() {
 ;    Main
 ;================================================================================================================
 BnsDroidRun_HongsilWarehouse() {
-    
+
     if(BnsDroidMission_HW_ClearB2HallWay() == 0) {
         return 0
     }
@@ -81,15 +81,15 @@ BnsDroidRun_HongsilWarehouse() {
     if(BnsDroidMission_HW_ClearB3Corridor() == 0) {
         return 0
     }
-    
+
     sleep 1000
 
     if(BnsDroidMission_HW_ClearB3BossRoom() == 0) {
         return 0
     }
-    
+
     sleep 1000
-    
+
     if(HW_ExcuteRoundTimes > 0) {
         ShowTipI("●[Mission] - execute round count: " HW_ExcuteRoundTimes)
         return 1
@@ -132,7 +132,7 @@ BnsDroidMission_HW_ClearB2HallWay(){
 
     BnsActionWalk(20000)
     BnsActionWalk(2500)            ;被打到進入戰鬥姿態會降跑速，補償損失時間
-    
+
     ;等待 B1 走廊的木頭人跟上
     ShowTipI("●[Mission1] - Stage1 - Waiting for pull enemy")
     sleep 5000
@@ -149,7 +149,7 @@ BnsDroidMission_HW_ClearB2HallWay(){
     ;停止自動戰鬥
     ShowTipI("●[Mission1] - Stage1 - Auto combat stop")
     BnsStartStopAutoCombat()
-        
+
     ;等待 B2 小房間門後的木頭人集中
     ShowTipI("●[Mission1] - Stage2 - Waiting for pull back door enemy")
     sleep 15000
@@ -184,9 +184,9 @@ BnsDroidMission_HW_ClearB2HallWay(){
 ;################################################################################################################
 BnsDroidMission_HW_ClearB3Corridor(){
     ShowTipI("●[Mission1] - Clear B3 Corridor")
-    
+
     sleep 1000
-    
+
     BnsActionAdjustDirectionOnMap(4)
     sleep 1000
 
@@ -204,7 +204,7 @@ BnsDroidMission_HW_ClearB3Corridor(){
     ShowTipI("●[Mission2] - Auto combat start")
     BnsStartStopAutoCombat()
     sleep 1000
-    
+
     while(BnsIsEnemyDetected() > 0) {
         sleep 100
     }
@@ -215,9 +215,9 @@ BnsDroidMission_HW_ClearB3Corridor(){
     ;停止自動戰鬥
     ShowTipI("●[Mission2] - Auto combat stop")
     BnsStartStopAutoCombat()
-    
+
     ShowTipI("●[Mission2] - Completed")
-    
+
 
     return 1
 }
@@ -230,12 +230,12 @@ BnsDroidAction_HW_AdjustToAlignCenter(){
     DBG:=0
     topBorder:=0    ;角色箭頭與地圖頂部邊界的距離
     topBorderWhenCenter:=84        ;角色垂直置中時箭頭與地圖頂部邊界的距離
-    
+
 
     arrow := StrSplit(CHARACTER_ARROW_POSITION, ",", "`r`n")
-    
+
     arrowY:=arrow[2]
-    
+
     loop, %arrowY% {
         gray := GetColorGray(GetPixelColor(arrow[1], arrow[2] - A_index))
 
@@ -244,7 +244,7 @@ BnsDroidAction_HW_AdjustToAlignCenter(){
             if(DBG >= 1) {
                 ShowTipD("i=" A_index ", gray level=" gray)
             }
-            
+
             if(DBG == 2) {
                 Send {alt down}
                 sleep 200
@@ -279,11 +279,11 @@ BnsDroidAction_HW_AdjustToAlignCenter(){
 BnsDroidAction_HW_SearchB3CorriderEntry() {
     ;擺盪限制
     swing:=1
-    
+
     BnsDroidAction_HW_AdjustToAlignCenter()
-    
+
     BnsActionAdjustCamara(-50, 7)
-    
+
     ;尋找門口右上方的單掛燈
     sX:= WIN_CENTER_X - (WIN_BLOCK_WIDTH * 8)
     sY:= WIN_BLOCK_HEIGHT * 0
@@ -293,7 +293,7 @@ BnsDroidAction_HW_SearchB3CorriderEntry() {
     ;校準中心
     OFFSET_CENTER_X:= WIN_CENTER_X - WIN_BLOCK_WIDTH * 4.7
 
-    
+
     ;先向右小轉，處理門只在右邊一點點避免繞整圈
     ;DumpLogD("[BnsDroidAction_HW_SearchB3CorriderEntry] not found pattern, turn left to search")
     ;BnsActionRotationRightAngle(8)
@@ -321,7 +321,7 @@ BnsDroidAction_HW_SearchB3CorriderEntry() {
                         DumpLogD("[BnsDroidAction_HW_SearchB3CorriderEntry] swing  o---->, " swing)
                     }
                 }
-                
+
             }
             else if(findX < OFFSET_CENTER_X - 10) {
                 if((OFFSET_CENTER_X - findX) > WIN_BLOCK_WIDTH) {
@@ -347,7 +347,7 @@ BnsDroidAction_HW_SearchB3CorriderEntry() {
 
         sleep 20
     }
-    
+
     DumpLogE("[BnsDroidAction_HW_SearchB3CorriderEntry] search done, pattern not found.")
     return 0
 }
@@ -377,12 +377,12 @@ BnsDroidMission_HW_ClearB3BossRoom(){
     ;等待 B3 Boss房的木頭人集中1
     ShowTipI("●[Mission3] - Stage1 - Waiting for pull enemy")
     sleep 5000
-    
+
     ;開啟自動戰鬥
     ShowTipI("●[Mission3] - Stage1 - Auto combat start")
     BnsStartStopAutoCombat()
     sleep 1000
-    
+
 
     if(BnsIsEnemyDetected() > 0) {
         sleep 100
@@ -405,7 +405,7 @@ BnsDroidMission_HW_ClearB3BossRoom(){
     ShowTipI("●[Mission3] - Stage2 - Auto combat start")
     BnsStartStopAutoCombat()
     sleep 1000
-    
+
     if(BnsIsEnemyDetected() > 0) {
         sleep 100
     }
@@ -436,23 +436,23 @@ BnsDroidMission_HW_ClearB3BossRoom(){
         ;if(BnsIsEnemyDetected() > 0) {
         ;    disengage:=HW_PickRewardsSecond
         ;}
-        
+
         if(BnsIsEnemyDetected() > 0 || FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 32, "res\pic_pick_box") == 1) {
             disengage:=HW_PickRewardsSecond * 5
             ;disengage:=HW_PickRewardsSecond
         }
 
         Send {f}
-        
+
         ;msg:="●[Mission3]  - Stage3 - Out of battle count: "  disengage
         msg:="●[Mission3]  - Stage3 - Out of battle count: "  Ceil(disengage / 5)
-        ShowTip(msg, 80, 10) 
+        ShowTip(msg, 80, 10)
     }
 
     ;停止自動戰鬥
     ShowTipI("●[Mission3]  - Stage3 - Auto combat stop")
     BnsStartStopAutoCombat()
-    
+
     ShowTipI("●[Mission3]  - Stage3 - Complete")
 
     BnsStopHackSpeed()
@@ -470,12 +470,12 @@ BnsDroidAction_HW_AlignCenterB3BossRoom() {
     DBG:=0
     topBorder:=0    ;角色箭頭與地圖頂部邊界的距離
     topBorderWhenCenter:=17        ;角色垂直置中時箭頭與地圖頂部邊界的距離
-    
+
 
     arrow := StrSplit(CHARACTER_ARROW_POSITION, ",", "`r`n")
-    
+
     arrowY:=arrow[2]
-    
+
     loop, %arrowY% {
         gray := GetColorGray(GetPixelColor(arrow[1], arrow[2] - A_index))
 
@@ -484,7 +484,7 @@ BnsDroidAction_HW_AlignCenterB3BossRoom() {
             if(DBG >= 1) {
                 ShowTipD("i=" A_index ", gray level=" gray)
             }
-            
+
             if(DBG == 2) {
                 Send {alt down}
                 sleep 200
@@ -533,7 +533,7 @@ BnsDroidAction_HW_SearchB3BossRoom() {
 
     ;校準中心
     OFFSET_CENTER_X := WIN_CENTER_X - WIN_BLOCK_WIDTH * 0.8
-    
+
     loop, 40 {
         if(FindPixelRGB(sX, sY, eX, eY, 0xF36A56, 24) == 1) {
             DumpLogD("[BnsDroidAction_HW_SearchB3BossRoom] detect Entry, x:" findX ", y:" findY)

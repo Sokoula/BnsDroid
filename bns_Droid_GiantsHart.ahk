@@ -27,10 +27,10 @@ Class BnsDroidGiantsHart {
 
     ; FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
     FIGHTING_MODE := 0    ;0:alone, 1:specific, 2:all
-    
-    ; FIGHTING_MEMBERS := "1"    ;action member 
-    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
-    FIGHTING_MEMBERS := "1,2,3"    ;action member 
+
+    ; FIGHTING_MEMBERS := "1"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member
+    FIGHTING_MEMBERS := "1,2,3"    ;action member
 
 
     ;戰鬥成員狀態
@@ -38,14 +38,14 @@ Class BnsDroidGiantsHart {
 
 
     ;是否完成特殊機制, 只在 SPECIAL_STAGE_HANDLE = 1 作用
-    isStageSpecialDone := 0    
+    isStageSpecialDone := 0
 
 
 
 ;================================================================================================================
 ;█ Interface
 ;================================================================================================================
-    
+
     ;------------------------------------------------------------------------------------------------------------
     ;■ 取得 cp 設定檔 ****
     ;* @return - .cp file; empty means not used.
@@ -57,9 +57,9 @@ Class BnsDroidGiantsHart {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 廣場導航 ****
     ;* @return - undefine
-    ;------------------------------------------------------------------------------------------------------------    
+    ;------------------------------------------------------------------------------------------------------------
     dungeonNavigation() {
-        
+
     }
 
 
@@ -75,7 +75,7 @@ Class BnsDroidGiantsHart {
         {
             case 0:
                 return this.runnableAlone()
-            
+
             case 1:
                 return this.runnableTeam()
 
@@ -150,10 +150,10 @@ Class BnsDroidGiantsHart {
     runStageAcceptMission() {
         BnsActionLateralWalkLeft(1400)
         sleep 500
-        
+
         send {f}
         sleep 2000
-        
+
         if(FindPicList(WIN_THREE_QUARTERS_X, WIN_THREE_QUARTERS_Y, WIN_WIDTH, WIN_HEIGHT, 120, "res\pic_f8_menu_exit") == 1) {
             loop 2 {
                 send {Esc}
@@ -165,7 +165,7 @@ Class BnsDroidGiantsHart {
                 send {f}
                 sleep 200
             }
-            
+
             sleep 500
             send {y}
         }
@@ -188,7 +188,7 @@ Class BnsDroidGiantsHart {
         send {f}
         sleep 2000
 
-        
+
 
         switch level
         {
@@ -221,7 +221,7 @@ Class BnsDroidGiantsHart {
                 BnsActionSprint(7000)
                 BnsActionCornerSprintUpRight(8000)
                 BnsActionLateralWalkRight(18000)
-                BnsActionCornerSprintUpRight(12000)                
+                BnsActionCornerSprintUpRight(12000)
         }
 
         ShowTipI("●[Mission] - Reach the destination")
@@ -237,11 +237,11 @@ Class BnsDroidGiantsHart {
         BnsStartHackSpeed()
         BnsStartAutoCombat()    ;start
         sleeptime := (BnsCmGetArg2() == 0 ? 60 : BnsCmGetArg2()) * 60 * 1000    ;預設戰鬥60分鐘
-    
+
         DumpLogD("★[DEBUG] - runStageFight, sleep time:" sleeptime)
 
         ShowTipI("●[Mission] - Fighting start, time:" floor(sleeptime / 60000) "mins")
-            
+
         timeBlock := floor(sleeptime / 5)
         DumpLogD("★[DEBUG] - runStageFight, block time:" timeBlock)
         loop 5 {
