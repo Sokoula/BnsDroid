@@ -27,9 +27,9 @@ Class BnsDroidChaosSupplyChain {
 
     FIGHTING_MODE := 0      ;0:specific, 1:all
     
-    FIGHTING_MEMBER := "1"    ;action member 
-    ; FIGHTING_MEMBER := "1,2,3,4"    ;action member 
-    ; FIGHTING_MEMBER := "1,2,3"    ;action member 
+    FIGHTING_MEMBERS := "1"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
 
 
     ;戰鬥成員狀態
@@ -122,7 +122,7 @@ Class BnsDroidChaosSupplyChain {
         ; ;移動到尾王
         ; ; fn := func(this.navigateToFinalBoss.name)
         ; fn := func(this.navigateToFinalBoss.name).bind(this)
-        ; BnsPcTeamMemberAction(fn, StrSplit(this.FIGHTING_MEMBER, ","))    ;全員移動到尾王
+        ; BnsPcTeamMemberAction(fn, StrSplit(FIGHTING_MEMBERS, ","))    ;全員移動到尾王
         ; ; sleep 6000
         ; sleep 4000
 
@@ -136,7 +136,7 @@ Class BnsDroidChaosSupplyChain {
                 sleep 15000 ;等確定死透
                 ;搭龍脈回去再戰尾王
 
-                this.teamMusterInFinalRoom(this.FIGHTING_MEMBER)
+                this.teamMusterInFinalRoom(FIGHTING_MEMBERS)
             }
             else {
                 break
@@ -259,9 +259,10 @@ Class BnsDroidChaosSupplyChain {
     runStageFightBoss1() {
         ShowTipI("●[Mission2] - go to boss1 room")
 
-        BnsActionWalkToPosition(-37450.199, 12666.190, 0x1) ;雜魚高地
-        BnsActionWalkToPosition(-36412.632, 12465.103, 0x2) ;樓梯下
-        BnsActionWalkToPosition(-36416.347, 11021.109, 0x4) ;花媽右側角落
+        BnsActionSprintToPosition(-37450.199, 12666.190, 0x1) ;雜魚高地
+        BnsActionSprintToPosition(-36412.632, 12465.103, 0x2) ;樓梯下
+        BnsActionSprintToPosition(-36411.644, 10912.168, 0x2) ;花媽右側角落
+        BnsActionSprintToPosition(-35341.382, 10650.022, 0x4) ;花媽右上角落
         ; BnsActionWalkToPosition(-35279.410, 10634.192)
 
         ;擺脫小怪
@@ -561,7 +562,6 @@ Class BnsDroidChaosSupplyChain {
     ;------------------------------------------------------------------------------------------------------------
     ;■ 前往尾王(龍脈) ****
     ;------------------------------------------------------------------------------------------------------------
-    ;
     navigateDpToFinalBoss() {
         DumpLogD("●[Action] - " A_ThisFunc)
         BnsStopAutoCombat()    ;stop
@@ -576,8 +576,10 @@ Class BnsDroidChaosSupplyChain {
     pickReward(mId := "") {
         DumpLogD("●[Action] - " A_ThisFunc)
 
+        BnsStartHackSpeed()
+
         ;戰鬥成員: 活著的跳過, 死掉的復活
-        if(inStr(this.FIGHTING_MEMBER, mId) != 0) {
+        if(inStr(FIGHTING_MEMBERS, mId) != 0) {
             if(this.resurrectionIfDead() == 1) {    ;角色死亡
                 ShowTipI("●[Action] - pickReward " mId " is dead, do resurrection and go back to pick reward")
             }
@@ -595,6 +597,8 @@ Class BnsDroidChaosSupplyChain {
 
         ;自動戰鬥撿箱
         BnsStartAutoCombat()
+
+        BnsStopHackSpeed()
     }
 
 
@@ -806,7 +810,7 @@ Class BnsDroidChaosSupplyChain {
 
 
         deadCount := 0
-        fighters := StrSplit(this.FIGHTING_MEMBER, ",")
+        fighters := StrSplit(FIGHTING_MEMBERS, ",")
         
         ;//TODO應該記住目前是誰，哪個桌面
         currentFighter := BnsPcGetCurrentDid()

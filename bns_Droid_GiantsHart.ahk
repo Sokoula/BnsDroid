@@ -28,9 +28,9 @@ Class BnsDroidGiantsHart {
     ; FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
     FIGHTING_MODE := 0    ;0:alone, 1:specific, 2:all
     
-    ; FIGHTING_MEMBER := "1"    ;action member 
-    ; FIGHTING_MEMBER := "1,2,3,4"    ;action member 
-    FIGHTING_MEMBER := "1,2,3"    ;action member 
+    ; FIGHTING_MEMBERS := "1"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
+    FIGHTING_MEMBERS := "1,2,3"    ;action member 
 
 
     ;戰鬥成員狀態
@@ -106,7 +106,7 @@ Class BnsDroidGiantsHart {
 
         this.runStageF8Engage()
         this.runStageAcceptMission()
-        this.runStageGoDestination(BnsCcGetArg1())
+        this.runStageGoDestination(BnsCmGetArg1())
         this.runStageFight()
 
         return 1
@@ -236,7 +236,7 @@ Class BnsDroidGiantsHart {
     runStageFight() {
         BnsStartHackSpeed()
         BnsStartAutoCombat()    ;start
-        sleeptime := (BnsCcGetArg2() == 0 ? 60 : BnsCcGetArg2()) * 60 * 1000    ;預設戰鬥60分鐘
+        sleeptime := (BnsCmGetArg2() == 0 ? 60 : BnsCmGetArg2()) * 60 * 1000    ;預設戰鬥60分鐘
     
         DumpLogD("★[DEBUG] - runStageFight, sleep time:" sleeptime)
 

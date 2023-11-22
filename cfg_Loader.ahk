@@ -28,31 +28,39 @@ global WIN_BLOCK_HEIGHT := WIN_HEIGHT // 16
 
 
 ;---系統設定---
-global HKEY := ^F1
-global PRKEY := ^F2
+global HKEY := "^F1"
+global PRKEY := "^F2"
 global DBUG := 1
-global DUMPLOG := 1
+global DUMPLOG := 0
 global LOGABLE := 4        ;1:only Error, 2:E|Warning, 3:E|W|Info, 4:E|W|I|Debug (ALL)
-global LOGPATH := log.txt
+global LOGPATH := "log.txt"
 
 ;---F8副本選單設定---
 ;(覆寫 bns_DungeonDispater.ahk 預設值)
 global ACTIVITY := 1        ;當前活動副本(入門才會有)        
 global PARTY_MODE := 2        ;組隊模式: 1:入門, 2:一般, 3:困難
-global PARTY_MEMBERS := 0,1,2,3    ;組隊人數(桌面使用個數)
+global PARTY_MEMBERS := "1,0,1,2,3,4"    ;組隊人數(桌面使用個數)
 
 
 ;---腳本選擇--------
-; 001 - 天之盆地鑰匙        - 地表
-; 101 - 鬼怪村活動          - 地表
-; 102 - 紅絲倉庫            - 地表
-; 103 - 可疑的空島          - F8
-; 104 - 巨神之心            - F8
-; 201 - 鬼面劇團            - 地表
-; 202 - 沙暴神殿            - f8
-; 203 - 青空船              - f8
-; 204 - 混沌補給基地        - f8
-global DUNGEON_INDEX := 201        ;最後會被 config.ini 複蓋
+; 001 - 天之盆地鑰匙      - 地表
+; 101 - 鬼怪村活動        - 地表
+; 102 - 紅絲倉庫          - 地表
+; 103 - 可疑的空島        - 統合
+; 104 - 輕功傳說大會      - 外界
+; 201 - 鬼面劇團          - 地表
+; 202 - 沙暴神殿          - 地表    (x)
+; 203 - 青空船            - 地表    (x)
+; 204 - 混沌補給基地      - 統合
+; 205 - 崑崙派本山        - 統合
+; 206 - 混沌黑神木        - 統合
+; 207 - 黑龍教異變研究所  - 統合
+; 208 - 黑龍教降臨殿      - 統合    (-)
+; 209 - 搖風島            - 統合    (-)
+; 210 - 混沌雪人洞窟      - 統合
+; 301 - 千手羅漢陣        - 地表
+; 302 - 巨神之心          - 外界
+global DUNGEON_INDEX := 301        ;最後會被 config.ini 複蓋
 
 
 
@@ -65,8 +73,8 @@ global DUNGEON_INDEX := 201        ;最後會被 config.ini 複蓋
 ;-------------------------------------------------------------------------------------------------------;
 ;@DISCARD
 ImportExternIniConfig() {
-    ;使用 #include 方式直接以 AHK 的方式載入變數; 缺點: 每次更動都需要執行 reload 
-    #include config.ini
+    ;使用 #include 方式直接以 AHK 的方式載入變數; 缺點: 每次更動都需要執行 reload, 而且不能有不符合 ini 的格式
+    ;#include config.ini
     
     ;補正實際運作誤差
     WIN_WIDTH := WIN_WIDTH + 2
@@ -78,6 +86,10 @@ ImportExternIniConfig() {
 ;    Read variables form each line in INI file                                                          ;
 ;-------------------------------------------------------------------------------------------------------;
 LoadExternIniConfig() {
+    if(!FileExist("config.ini")) { 
+        return
+    }
+
     ;使用讀檔逐行解析, 每次執行都是動態讀檔, 不需要 reload
     configfile := FileOpen("config.ini","r", "UTF-8-RAW")
 
@@ -108,6 +120,10 @@ LoadExternIniConfig() {
 ;-------------------------------------------------------------------------------------------------------;
 ;@DISCARD
 ReadExternIniConfig() {
+    if(!FileExist("config.ini")) { 
+        return
+    }
+
     ;使用讀檔逐行解析
     configfile := FileOpen("config.ini","r", "UTF-8-RAW")
 
@@ -127,7 +143,7 @@ ReadExternIniConfig() {
 ;-------------------------------------------------------------------------------------------------------;
 ;    Assign Overlay value to variable                                                                   ;
 ;-------------------------------------------------------------------------------------------------------;
-;@DISCARDaw
+;@DISCARD
 SetConfigValue(key, value) {
     
     switch key
@@ -241,6 +257,8 @@ DumpSystemConfig() {
     DumpLogI("[System] Activity:" ACTIVITY)
     DumpLogI("[System] Party mode:" PARTY_MODE)
     DumpLogI("[System] Aerodrome level:" DEMONSBANE_LEVEL)
+    DumpLogI("[System] Party Members:" PARTY_MEMBERS)
+    DumpLogI("[System] Dungeon Index:" DUNGEON_INDEX)
 }
 
 

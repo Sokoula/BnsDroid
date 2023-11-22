@@ -25,10 +25,6 @@ global CHARACTER_ARROW_POSITION := 1770,150
 ;hight speed role = 1
 global HIGH_SPEED_ROLE := 0
 
-;role type = 0
-global ROLE_TYPE := 0
-
-
 ;character profiles (array list: {[index, role type, hight speed], ...)
 global CHARACTER_PROFILES := []
 global PROFILES_ITERATOR := 0
@@ -37,24 +33,24 @@ global PROFILES_ITERATOR := 0
 
 
 ;Role enum
-;role: 1:blademaster 2:kungfufighter 3:forcemaster 4:summoner 5:assassin 6:destoryer 7:swordmaster
-;      8:warlock 9:soulfighter 10:shooter 11:warrior 12:archer 13:thunderer 14:dualblader
+;role: 0:disable 1:blademaster 2:kungfufighter 4:shooter 3:forcemaster 6:summoner 7:assassin 5:destoryer
+;      8:swordmaster 9:warlock 10:soulfighter 11:warrior 12:archer 14:thunderer 15:dualblader 16:musician
 global ROLE_UNSPECIFIED     := 0    ;未指定
 global ROLE_BLADEMASTER     := 1    ;劍士
 global ROLE_KUNGFUFIGHTER   := 2    ;拳士
 global ROLE_FORCEMASTER     := 3    ;氣功
-global ROLE_SUMMONER        := 4    ;召喚
-global ROLE_ASSASSIN        := 5    ;刺客
-global ROLE_DESTORYER       := 6    ;力士
-global ROLE_SWORDMASTER     := 7    ;燐劍
-global ROLE_WARLOCK         := 8    ;咒術
-global ROLE_SOULFIGHTER     := 9    ;乾坤
-global ROLE_SHOOTER         := 10   ;槍手
+global ROLE_SHOOTER         := 4    ;槍手
+global ROLE_DESTORYER       := 5    ;力士
+global ROLE_SUMMONER        := 6    ;召喚
+global ROLE_ASSASSIN        := 7    ;刺客
+global ROLE_SWORDMASTER     := 8    ;燐劍
+global ROLE_WARLOCK         := 9    ;咒術
+global ROLE_SOULFIGHTER     := 10   ;乾坤
 global ROLE_WARRIOR         := 11   ;鬥士
 global ROLE_ARCHER          := 12   ;弓手
-global ROLE_THUNDERER       := 13   ;天道
-global ROLE_DUALBLADER      := 14   ;雙劍
-global ROLE_MUSICIAN        := 15   ;樂師
+global ROLE_THUNDERER       := 14   ;天道
+global ROLE_DUALBLADER      := 15   ;雙劍
+global ROLE_MUSICIAN        := 16   ;樂師
 
 
 
@@ -100,6 +96,7 @@ BnsActionMoveToPosition(tx ,ty, sprint, linked := 0, timeout := 0, accuracy := 1
 
     loop {
         if(timeout != 0 && A_TickCount - sTick >= timeout) {
+            ret := 0
             break
         }
 
@@ -319,14 +316,16 @@ BnsActionSprintJump(ms := 500) {
     ; }
 
     ;輕功跳
-    Send, {w Down}
-    Send, {Shift}
+    ControlSend,, {w Down}, %res_game_window_title%
+    ControlSend,, {Shift}, %res_game_window_title%
     dsleep(200)    ;必需 > 200ms, 不然跳不起來
-    Send, {Space Down}    ;Space 必需拆開寫，不然沒作用
-    dsleep(30)
-    Send, {Space Up}
+    ; ControlSend,, {Space Down}, %res_game_window_title%    ;Space 必需拆開寫，不然沒作用
+    ; dsleep(30)
+    ; ControlSend,, {Space Up}, %res_game_window_title%
+    ControlSend,, {Space}, %res_game_window_title%
     dsleep(ms)
-    Send, {w Up}
+    ControlSend,, {w Up}, %res_game_window_title%
+    dsleep(50)  ;防後續按鍵沾粘造成失效
 }
 
 
@@ -335,21 +334,31 @@ BnsActionSprintJump(ms := 500) {
 ;================================================================================================================
 ;Gliding;  [ ms ] time for Gliding;  [ sprint ] 0:off, 1:on;  [ linked ] 0: 不串接, 1~: 串接前後操作;
 BnsActionGliding(ms, sprint := 0, linked := 0) {
+    speed := GetMemoryHack().getSpeed()
+
+    if(speed != 1) {    ;起跳階段停用仙速
+        BnsStopHackSpeed()
+    }
 
     if(linked == 0 || linked & 0x01 != 0) {
-        BnsActionSprintJump(600)
+        BnsActionSprintJump(650)
         PostMessage, 0x100, 0x20, 0, , %res_game_window_title%  ;0x100: WM_KEYDOWN Space
-        sleep 30
+        dsleep(50)
         PostMessage, 0x101, 0x20, 0, , %res_game_window_title%  ;0x101: WM_KEYUP Space
     }
 
+    if(speed != 1) {    ;起跳後原本有加速就恢復仙速
+        BnsStartHackSpeed()
+    }
+
     if(sprint == 1) {
+        dsleep(100)
         PostMessage, 0x100, 0x57, 0, , %res_game_window_title%  ;0x100: WM_KEYDOWN w
         PostMessage, 0x100, 0xA0, 0, , %res_game_window_title%  ;0x100: WM_KEYDOWN L-shift 0xA0 (shift 0x10 左右都是，但無效)
         PostMessage, 0x101, 0xA0, 0, , %res_game_window_title%  ;0x101: WM_KEYUP L-shift 0xA0
     }
 
-    sleep %ms%
+    dsleep(ms)
 
     if(sprint == 1) {
         PostMessage, 0x101, 0x57, 0, , %res_game_window_title%  ;0x100: WM_KEYUP w
@@ -357,7 +366,7 @@ BnsActionGliding(ms, sprint := 0, linked := 0) {
 
     if(linked == 0 || linked & 0x04 != 0) {
         PostMessage, 0x100, 0x20, 0, , %res_game_window_title%  ;0x100: WM_KEYDOWN Space
-        sleep 50
+        dsleep(50)
         PostMessage, 0x101, 0x20, 0, , %res_game_window_title%  ;0x101: WM_KEYUP Space
         sleep 1000  ;wait for next action
     }
@@ -405,7 +414,7 @@ BnsMeansureTargetDistDegree(tx ,ty, ox := 0, oy := 0) {
 
     dx := tx - ox
     dy := ty - oy
-    
+
     if(DBUG >= 2) {
         ShowTipD("ox: " ox ", oy: " oy ", tx: " tx ", ty: " ty)
     }
@@ -416,7 +425,7 @@ BnsMeansureTargetDistDegree(tx ,ty, ox := 0, oy := 0) {
     ;計算目標座標方向角: 先計算目標點與X軸的夾角，再依正負座標值補償象限
     theta := abs(asin(dy / distance)) / 3.1415926535 * 180
     degree := (dx < 0 && dy < 0) ? theta + 180 : (dx < 0) ? 180 - theta : (dy < 0) ? 360 - theta : theta
-    
+
     if(DBUG >= 2) {
         ShowTipD("dx: " dx ", dy: " dy ", theta: " theta ", degree: " degree ", dist:" distance)
     }
@@ -531,13 +540,7 @@ BnsActionRotationDegree270() {
 ;================================================================================================================
 ;    ACTION - Adjust direction(azimuth)
 ;================================================================================================================
-;設定遊戲引擎方位角(遊戲memory hack使用值);  [ targetDegree ] 角度(float);
-BnsActionAdjustEngineDirection(targetDegree) {
-    BnsActionAdjustDirection(targetDegree, 1)
-}
-
-
-;設定方位角;  [ targetDegree ] 角度(float);  [ mode ] 0:直角座標, 1:UE座標
+;設定相機方位角;  [ targetDegree ] 角度(float);  [ mode ] 0:直角座標(預設), 1:UE座標
 BnsActionAdjustDirection(targetDegree, mode := 0) {
     ;            90         (直角坐標系)                          0            (劍靈坐標系)
     ;            |                                                |
@@ -558,7 +561,13 @@ BnsActionAdjustDirection(targetDegree, mode := 0) {
     }
 }
 
+;設定遊戲引擎方位角(遊戲memory hack使用值);  [ targetDegree ] 角度(float);
+BnsActionAdjustEngineDirection(targetDegree) {
+    BnsActionAdjustDirection(targetDegree, 1)
+}
 
+
+;@Discard 設定方位角;  [ targetDegree ] 直角座標系角度(float)
 BnsActionAdjustDirectionOnMap(targetDegree) {
         DBG:=0
         arrow := StrSplit(CHARACTER_ARROW_POSITION, ",", "`r`n")
@@ -675,55 +684,22 @@ BnsActionAdjustDirectionOnMap(targetDegree) {
         BnsActionRotationDuring(2.755 * offsetDegree, 1)
 }
 
+
 ;================================================================================================================
 ;    ACTION - Adjuset camara angle
 ;================================================================================================================
+;設定相機傾角;  [ altitude ] 角度(float)
 BnsActionAdjustCamaraAltitude(altitude) {
-    GetMemoryHack().setCamAltitude(altitude)
+    if(GetMemoryHack().isMemHackWork() == 1) {
+        GetMemoryHack().setCamAltitude(altitude)
+        return
+    }
+
+    ;無法對應傳統API, 參數不相容
 }
 
-;@Discard
-BnsActionAdjustCamara(pxY, times) {
 
-    DumpLogD("[BnsActionAdjustCamara] pxY:" pxY ", times:" times)
-
-    ;視距規正
-    BnsActionAdjustCamaraZoom(27)
-
-    ;視距規正
-    ;Send {Wheelup 50}
-    ;sleep 1000
-    ;Send {Wheeldown 30}
-    ;sleep 1000
-
-    sleep 500
-
-    ;拉到固定俯角
-    BnsActionAdjustCamaraAngle(pxY, times)
-    
-    sleep 200
-}
-
-;調整縮放(滾輪向下)
-BnsActionAdjustCamaraZoom(zoom) {
-    ;滑鼠回到正中間    
-    Send {Alt down}
-    sleep 200
-
-    MouseMove WIN_CENTER_X, WIN_CENTER_Y
-    sleep 200
-
-    Send {Alt up}
-    sleep 200
-
-
-    MouseWheel( 1, 40)
-    sleep 100
-    MouseWheel(-1, zoom)
-
-}
-
-;調整俯角
+;@Discard ;設定相機傾角  [ pxY ] 偏移值(pixel); [ times ] 執行次數
 BnsActionAdjustCamaraAngle(pxY, times) {
     ;滑鼠回到正中間    
     Send {Alt down}
@@ -749,13 +725,63 @@ BnsActionAdjustCamaraAngle(pxY, times) {
     }
 }
 
+;================================================================================================================
+;    ACTION - Adjuset camara zoom
+;================================================================================================================
+;設定相機視距;  [ zoom ] 視距 0 ~ 800 ~  ClientConfiguration.xml 的 maxZoom 值
+BnsActionAdjustCamaraZoom(zoom) {
+    if(GetMemoryHack().isMemHackWork() == 1) {
+        GetMemoryHack().setCamZoom(zoom)
+        return
+    }
+
+    ;無法對應傳統API, 參數不相容
+}
+
+
+;調整縮放(滾輪向下)
+BnsActionAdjustCamaraZoomLegacy(zoom) {
+    ;滑鼠回到正中間    
+    Send {Alt down}
+    sleep 200
+
+    MouseMove WIN_CENTER_X, WIN_CENTER_Y
+    sleep 200
+
+    Send {Alt up}
+    sleep 200
+
+
+    MouseWheel( 1, 40)
+    sleep 100
+    MouseWheel(-1, zoom)
+
+}
+
 
 ;================================================================================================================
-;    ACTION - Available talk type
+;    ACTION - Adjuset camara calibration
 ;================================================================================================================
-;Get talk type; [ return ] 0:none, 18:對話, 20:祈禱/採集/蒐集/記錄祕境, 23:搭龍脈, 40:修理, 61:觸發
-BnsIsAvailableTalk() {
-    return GetMemoryHack().isAvailableTalk()
+;@Discard; 正規化視角; [ pxY ] 偏移值(pixel); [ times ] 執行次數
+BnsActionAdjustCamara(pxY, times) {
+
+    DumpLogD("[BnsActionAdjustCamara] pxY:" pxY ", times:" times)
+
+    ;視距規正
+    BnsActionAdjustCamaraZoomLegacy(27)
+
+    ;視距規正
+    ;Send {Wheelup 50}
+    ;sleep 1000
+    ;Send {Wheeldown 30}
+    ;sleep 1000
+
+    sleep 500
+
+    ;拉到固定俯角
+    BnsActionAdjustCamaraAngle(pxY, times)
+    
+    sleep 200
 }
 
 
@@ -763,7 +789,9 @@ BnsIsAvailableTalk() {
 ;    ACTION - Auto combat
 ;================================================================================================================
 BnsStartStopAutoCombat() {
-    Send, <+{F4}    
+    ; Send, {F4}
+    ; ControlSend,,{F2}, %res_game_window_title%    
+    ControlSend,,<+{F4}, %res_game_window_title%
 }
 
 BnsStartAutoCombat() {
@@ -780,6 +808,17 @@ BnsStopAutoCombat() {
         BnsStartStopAutoCombat()
         sleep 200
     }
+}
+
+
+BnsStartAutoCombatSpeed() {
+    BnsStartHackSpeed()
+    BnsStartAutoCombat()
+}
+
+BnsStopAutoCombatSpeed() {
+    BnsStopHackSpeed()
+    BnsStopAutoCombat()
 }
 
 
@@ -827,7 +866,7 @@ BnsActionResurrection() {
     BnsStopAutoCombat()
     loop 3 {
         ControlSend,,{4}, %res_game_window_title%
-        sleep 100
+        sleep 300
     }
 }
 
@@ -955,10 +994,10 @@ BnsSelectCharacter(index) {
     }
 
     regions := StrSplit(CHARATER_LIST_REGION, ",", "`r`n")
-    
+
     ;角色卡片9個 + 分頁標籤 0.6 個卡片高度
-    cardH := regions[4] / 9.6    ;單個角色卡高度
-    
+    cardH := (regions[4] - regions[2]) / 9.6    ;單個角色卡高度
+
     pageX1 := regions[5]
     pageX2 := regions[6]
     pageY  := regions[2] + cardH * 9.3    ;分頁標籤在第9個角色卡下方, 0.6 個角色卡高度, 取置中 0.3 的Y位值
@@ -985,7 +1024,7 @@ BnsSelectCharacter(index) {
 
     sleep 1000
 
-    mX := regions[1] + (regions[3] * 0.5)
+    mX := regions[1] + ((regions[3] - regions[1])  * 0.5)
     mY := regions[2] + (cardH * ((index - 1) + 0.5))
     
     MouseClick, left, mX, mY
@@ -1014,7 +1053,7 @@ BnsMapTeleport(level, offsetX, offsetY) {
     loop, 3 {
         if(FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 80, "res\pic_map") == 1) {
             MouseMove findX + offsetX, findY + offsetY
-            
+
             ;調整地圖層級, 先調到最底再往上一層調
             MouseWheel(-1, 4)
             sleep 500
@@ -1029,7 +1068,7 @@ BnsMapTeleport(level, offsetX, offsetY) {
 
             if(FindPixelRGB(WIN_BLOCK_WIDTH * 8, WIN_BLOCK_HEIGHT * 13, WIN_BLOCK_WIDTH * 10, WIN_BLOCK_HEIGHT * 14, 0x6AFF8A, 10) == 1) {
                 ShowTipD("●[System] - Open map")
-                
+
                 ;領取斬首任務獎勵，如果有
                 Send f
                 sleep 2000
@@ -1040,7 +1079,6 @@ BnsMapTeleport(level, offsetX, offsetY) {
                 continue
             }
 
-            
             sleep 5000
             if(BnsWaitMapLoadDone() == 1) {
                 return 1
@@ -1048,7 +1086,6 @@ BnsMapTeleport(level, offsetX, offsetY) {
             else {
                 return 0
             }
-
         }
         else {
             ShowTipD("●[System] - Open map")
@@ -1059,10 +1096,14 @@ BnsMapTeleport(level, offsetX, offsetY) {
 }
 
 
-
 ;================================================================================================================
 ;    STATUS - Popsition
 ;================================================================================================================
+;取得角色職業(MemHack);  [ return ] 0:未知 1:劍 2:拳 3:氣 4:槍 5:力 6:召 7:刺 8:燐劍 9:咒 10:乾坤 11:鬥 12:弓 14:天道 15:雙劍 16:樂師
+BnsRoleType() {
+    return (GetMemoryHack().isMemHackWork() == 1) ? GetMemoryHack().getRoleType() : "0"
+}
+
 ;取得角色座標 X(MemHack);  [ return ] float: 座標值; empty: MemHack 無效
 BnsGetPosX() {
     return (GetMemoryHack().isMemHackWork() == 1) ? GetMemoryHack().getPosX() : ""
@@ -1079,6 +1120,43 @@ BnsGetPosZ() {
 }
 
 
+;================================================================================================================
+;    STATUS - Target object id
+;================================================================================================================
+BnsGetTargetSerial() {
+    return (GetMemoryHack().isMemHackWork() == 1) ? GetMemoryHack().getMainTargetSerial() : ""
+}
+
+
+;================================================================================================================
+;    STATUS - Available talk type
+;================================================================================================================
+;Get talk type; [ return ] 0:none, 18:對話, 20:祈禱/採集/蒐集/記錄祕境, 23:搭龍脈, 40:修理, 61:觸發
+BnsIsAvailableTalk() {
+    type := GetMemoryHack().getTalkType()
+    return (type == "") ? 0 : type
+}
+
+
+;================================================================================================================
+;    STATUS - Is bidding window
+;================================================================================================================
+;Get bidding status; [ return ] 0:none, 1: yes<
+BnsIsBidding() {
+    return (GetMemoryHack().isMemHackWork() == 1) ? BnsIsBiddingMem() : BnsIsBiddingLegacy()
+}
+
+BnsIsBiddingMem(){
+    return GetMemoryHack().getBiddingStatus()
+}
+
+BnsIsBiddingLegacy() {
+    if(FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 100, "res\pic_bidding_form_icon") == 1) {
+        return 1
+    }
+
+    return 0
+}
 
 
 ;================================================================================================================
@@ -1099,6 +1177,15 @@ BnsIsPartyWork() {
 ;    CHECK - Is load map done
 ;================================================================================================================
 BnsIsMapLoading() {
+    return (GetMemoryHack().isMemHackWork() == 1) ? BnsIsMapLoadingMem() : BnsIsMapLoadingLegacy()
+}
+
+BnsIsMapLoadingMem() {
+    return (GetMemoryHack().getMainTargetBloodFull() == "" || GetMemoryHack().getMainTargetBloodFull() == 0)
+}
+
+
+BnsIsMapLoadingLegacy() {
     if(WinActive(res_game_window_title)) {
         
         pColor:=GetPixelColor(10, WIN_HEIGHT - 5)
@@ -1148,6 +1235,7 @@ BnsWaitMapLoadDone() {
     loop, 300 {
         
         if(BnsIsMapLoading() == 0) {
+            sleep 2000
             ShowTipI("●[System] - Loading Done...")
             return 1
         }
@@ -1166,8 +1254,19 @@ BnsWaitMapLoadDone() {
 ;================================================================================================================
 ;    CHECK - Check Enemy alive
 ;================================================================================================================
-;是否偵測到敵人; [ return ] 0:失去目標(NONE); 1:紅標(BOSS); 2:藍標(MOB)
+;是否偵測到敵人; [ return ] 0:失去目標; 1:有目標
 BnsIsEnemyDetected() {
+    return (GetMemoryHack().isMemHackWork() == 1) ? BnsIsEnemyDetectedMem() : BnsIsEnemyDetectedLegacy()
+}
+
+;是否偵測到敵人; [ return ] 0:失去目標; 1:有目標
+BnsIsEnemyDetectedMem() {
+    return (GetMemoryHack().getMainTargetSerial() > 0)
+}
+
+
+;是否偵測到敵人; [ return ] 0:失去目標(NONE); 1:紅標(BOSS); 2:藍標(MOB)
+BnsIsEnemyDetectedLegacy() {
     ret:=0
 
     if(BnsIsBossDetected() == 1) {
@@ -1204,13 +1303,14 @@ BnsIsBossDetected() {    ;主要Boss - 紅色
 
     ;ShowTipD("[System] - BnsIsBossDetected sx:" sx + width * 0.7 ", sy:" sy ", ex:"  sx + width ", ey:" sy + height)
 
-    isCheck1 := FindPixelRGB(sx, sy, sx + width, sy + height, 0xF0F0F0, 0x08)
-    isCheck2 := FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0xF2DA8A, 0x10)
-    isCheck2 := isCheck2 | FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0xDBB968, 0x10)
+    isCheck1 := FindPixelRGB(sx, sy, sx + width, sy + height, 0xF0F0F0, 0x10)   ;等級白字 - 高亮
+    isCheck1 := isCheck1 | FindPixelRGB(sx, sy, sx + width, sy + height, 0xA9A9A9, 0x10)   ;等級白字 - 低亮
+    isCheck2 := FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0xF2DA8A, 0x10) ;等級框金邊-色1
+    isCheck2 := isCheck2 | FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0xDBB968, 0x10)  ;等級框金邊-色2
 
     if(isCheck1 == 1 && isCheck2 == 1) {
         ret:=1
-        
+
         if(DBUG == 1) {
             DumpLogD("[BnsIsBossDetected] BOSS detected!")
         }
@@ -1301,15 +1401,18 @@ BnsIsEnemyClearTick(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有�
             }
             else {    ;沒有指定 escape 條件就以角色死亡為脫出條件
                 if(BnsIsCharacterDead() == 1) {
-                    charactorDeadCount += 1
+                    return -1
                 }
-                else {
-                    charactorDeadCount := 0
-                }
+                ; if(BnsIsCharacterDead() == 1) {
+                ;     charactorDeadCount += 1
+                ; }
+                ; else {
+                ;     charactorDeadCount := 0
+                ; }
 
-                if(charactorDeadCount == 5) {     ;dead judgement 500ms
-                    return -1     ;you dead
-                }
+                ; if(charactorDeadCount == 5) {     ;dead judgement 500ms
+                ;     return -1     ;you dead
+                ; }
             }
 
 
@@ -1359,7 +1462,7 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
     r := floor(retain / 100)
     ;總超時時間(最小單位 s)
     t := timeout * 10
-    
+
     if( t == 0 ) {
         t := 2147483647    ;不限時間
     }
@@ -1379,7 +1482,7 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
                 }
             }
             else {    ;沒有指定 escape 條件就以角色死亡為脫出條件
-                if(BnsIsCharacterDead() == 1) {
+                if(BnsIsCharacterDead() > 0) {
                     return -1
                 }
             }
@@ -1387,7 +1490,7 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
             if(fnAction) {    ;如果 fnAction != null
                 ret := fnAction.call()
 
-                if(DBUG >=1) {
+                if(DBUG >= 1) {
                     ShowTipD("●[Debug] - BnsIsEnemyClearCount - exec action,  : " ret)
                 }
             }
@@ -1416,7 +1519,8 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
         sleep 100
 
         if(A_index == floor(t * 0.8)) {
-            BnsActionAdjustCamaraZoom(27)
+            BnsActionAdjustCamaraAltitude(330)  ;往下看,避免環境取色誤判
+            ; BnsActionAdjustCamaraZoom(27)
         }
     }
 
@@ -1425,9 +1529,30 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
 
 
 
+
 ;================================================================================================================
 ;    CHECK - Is Leave Battle
 ;================================================================================================================
+;阻塞式等待直到脫離戰鬥; [ maxTime ] 超時結束阻塞 ms; [ return ]  0:超時; 1:脫戰狀態
+BnsWaitingLeaveBattle(maxTime := 0) {
+    tickStartTime := A_TickCount
+
+    ;等待脫戰
+    loop {
+        if(BnsIsLeaveBattle()) {
+            return 1
+        }
+
+        if(maxTime != 0 && A_TickCount - tickStartTime > maxTime) {
+            return 0
+        }
+
+        sleep 500
+    }
+}
+
+
+
 ;是否為脫戰狀態; [ maxTime ] 最大判定時間 ms;  [ return ] 0:戰鬥狀態; 1:脫戰狀態
 BnsIsLeaveBattle(maxTime := 1) {    ;ms
     return (GetMemoryHack().isMemHackWork() == 1) ? !GetMemoryHack().isInBattling() : BnsIsLeaveBattleLegacy(maxTime)
@@ -1480,13 +1605,24 @@ BnsIsLeaveBattleLegacy(maxTime) {    ;ms
 ;================================================================================================================
 ;    CHECK - Check Character Death
 ;================================================================================================================
-;Get character wether dead;  @return - 1: dead; 0: alive
-BnsIsCharacterDead() {  ;有bug, 隔離狀態也是1
-    return (GetMemoryHack().isMemHackWork() == 1) ? BnsIsCharacterDeadMem() : BnsIsCharacterDeadLegcy()
+;Get character wether dead; [ mId ] 0: current; 1 ~ n: member id(desktop id) [ return ] 0: alive; 1: dead; 2: dying
+BnsIsCharacterDead(mId := 0) {  ;有bug, 隔離狀態也是1
+    if(GetMemoryHack(mId).isMemHackWork() == 1) {
+        if(BnsIsCharacterDeadMem(mId) == 1) {
+            return 1    ;死透
+        }
+
+        if(GetMemoryHack(mId).getHpValue() == 0 && GetMemoryHack(mId).getPosture() == 6) {
+            return 2    ;還能爬
+        }
+    }
+    else {
+        return BnsIsCharacterDeadLegcy()
+    }
 }
 
-BnsIsCharacterDeadMem() {
-    return (GetMemoryHack().getPosture() == 1)
+BnsIsCharacterDeadMem(mId) {
+    return (GetMemoryHack(mId).getPosture() == 1)
 }
 
 BnsIsCharacterDeadLegcy() {

@@ -176,7 +176,7 @@ FindPixelRGB(x0, y0, x1, y1, colorHex, s) {
     global findX := getX
     global findY := getY
 
-    if(DBUG >= 1) {
+    if(DBUG >= 2) {
         ShowTipD("[FindPixelRGB] err: " ErrorLevel "  color:" colorHex ", s:" s ",  getX:" getX ",  getY:" getY)
 
         ; Send {Alt down}
@@ -226,7 +226,8 @@ GetColorGray(colorHex) {
     B := colorHex & 0xFF 
 
     Gray := floor((R*299 + G*587 + B*114 + 500) / 1000)
-    
+    ; Gray := floor(((R*0.299) + (G*0.587) + (B*0.114)) * 255)
+
     return Gray
 }
 
@@ -296,6 +297,80 @@ GetAverageColor(sX, sY, widthX, heightY) {
 ToBase(n,b){  
     return (n < b ? "" : ToBase(n//b,b)) . ((d:=Mod(n,b)) < 10 ? d : Chr(d+55))  
 }
+
+
+
+;----------------------------------------------------------------------------------------------------------------
+;    RegionSearch - (尋找距型區域)
+;----------------------------------------------------------------------------------------------------------------
+;偵測遊戲視窗並返回屬性; [ c1 ] 左上角判定色; [ c2 ] 右下角判定色; [ s1 ] 左上容許值; [ s2 ] 左下容許值; [ return ] Array[左上X, 左上Y, 右下X, 右下Y, width, height]
+RegionSearch(c1, c2:=0, s1:=5, s2:=5) {
+    xblock := floor(WIN_WIDTH / 6)
+    yblock := floor(WIN_HEIGHT / 6)
+    winAttr := Array()
+
+    DBUG := 1
+    loop 2 {
+        stage := A_Index
+        c := (stage == 1) ? c1 : c2
+        s := (stage == 1) ? s1 : s2
+
+        ret := 0
+        loop 6 {
+            x0 := (stage == 1) ? xblock * (A_index - 1) : WIN_WIDTH - (xblock * (A_index - 1))
+            x1 := (stage == 1) ? xblock * A_index       : WIN_WIDTH - (xblock * A_index)
+
+            loop 6 {
+                y0 := (stage == 1) ? yblock * (A_index - 1) : WIN_HEIGHT - (yblock * (A_index - 1))
+                y1 := (stage == 1) ? yblock * A_index       : WIN_HEIGHT - (yblock * A_index)
+
+                o := (stage == 1) ? 2 : -2
+
+                ShowTip("stage: " stage  ", "  x0 ", " y0 " -  " x1 ", " y1)
+
+                ;找到疑似目標(偵側左上/右下)
+                if(FindPixelRGB(x0,y0,x1,y1, c, s)) {
+                    tx := findX
+                    ty := findY
+                    chk := 0
+
+                    ;垂直偏移確認是否為目標框
+                    loop 5 {
+                        if(FindPixelRGB(tx + o, ty, tx + o, ty, c, s)) {
+                            chk := chk + 1
+                        }
+                    }
+                    
+                    if(chk == 5) {
+                        winAttr.push(tx + ((stage == 1) ? -5 : 5))
+                        winAttr.push(ty)
+                        ret := 1
+                        break
+                    }
+                }
+            }
+
+            if(ret == 1) {
+                break
+            }
+        }
+
+        if(ret == 0) {
+            return 0
+        }
+
+        if(DBUG >= 1) {
+            ShowTip("↖ left top corner", tx + ((stage == 1) ? -5 : 5), ty)
+            sleep 1000
+        }
+    }
+
+    winAttr.push(winAttr[3] - winAttr[1])   ;width
+    winAttr.push(winAttr[4] - winAttr[2])   ;height
+
+    return winAttr
+}
+
 
 
 
@@ -374,7 +449,6 @@ GetMemoryHack(did := 0) {
 
     return memHacks[curtDid]
 }
-
 
 
 

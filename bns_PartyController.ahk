@@ -52,16 +52,19 @@ BnsPcGetCurrentDid() {    ;desktop id
     return queryDesktopId(getCurrentUUID())
 }
 
+
 ;================================================================================================================
 ;    ACTION - send party invite
 ;================================================================================================================
+;隊伍遨請; [ name ] 角色名稱; [ dId ] 角色所在桌面
 BnsPcSendPartyInvite(name, dId) {
-    send {Enter}
+    currentId := getCurrentDesktopId()
+    
+    ControlSend,,{ENTER}, %res_game_window_title%
+    ControlSend,,/invite %name%, %res_game_window_title%
+    sleep 600
+    ControlSend,,{ENTER}, %res_game_window_title%
     sleep 100
-    Send /invite %name%
-    sleep 100
-    send {Enter}
-    sleep 1000
 
     switchDesktopByNumber(dId)
     sleep 1000
@@ -69,10 +72,8 @@ BnsPcSendPartyInvite(name, dId) {
     WinActivate, %res_game_window_title%
     Send {y}
     sleep 100
-    
 
-
-    switchDesktopByNumber(1)
+    switchDesktopByNumber(currentId)
     sleep 1000
 
     WinActivate, %res_game_window_title%
@@ -88,6 +89,17 @@ BnsPcSendPartyInvite(name, dId) {
     }
     
     return 0
+}
+
+;================================================================================================================
+;    ACTION - send party invite
+;================================================================================================================
+BnsPcLeaveParty(dId) {
+    switchDesktopByNumber(dId)
+
+    BnsStopAutoCombat()
+    ControlSend,,{ENTER}/leave{ENTER}{y}, %res_game_window_title%   ;使用 /leave 退出隊伍
+    sleep 300
 }
 
 
@@ -242,7 +254,7 @@ BnsPcOpenDragonPulse(ms) {
 ;    ACTION - Excute common action for specific members (function ptr callback)
 ;================================================================================================================
 ;團隊批次行動; [ fnAction ] 執行函數(funtion pointer);  [ mids ] 組員id array, 默認全員; [ feedback ] 回傳執行 mid 給 fnAction 當參數;  [ backleader ] 完成時是否切回隊長(默認);  [ delay ] 桌面切換 dealy
-BnsPcTeamMemberAction(fnAction, mids := 0, feedback := 0, backleader := 1, delay := 800) {    ;mids 預期是陣列型別, 要執行的 member 要放入, mids = 0 表示 null
+BnsPcTeamMemberAction(fnAction, mids := "", feedback := 0, backleader := 1, delay := 800) {    ;mids 預期是陣列型別, 要執行的 member 要放入, mids = 0 表示 null
 
     partyCtrl := StrSplit(PARTY_MEMBERS, ",", "`r`n")
     leaderId := partyCtrl[3]
@@ -254,11 +266,19 @@ BnsPcTeamMemberAction(fnAction, mids := 0, feedback := 0, backleader := 1, delay
         ; ShowTipI("[BnsPcTeamMemberAction] - mids is null, load all members")
         mids := BnsPcGetPartyMemberList()
     }
+    else if(!isObject(mids)) {  ;mids 是字串時(非陣列), 先轉為陣列
+        mids := StrSplit(mids, ",")
+    }
 
     ;切換換角色視窗
     For i, m in mids {
         ; member := partyCtrl[2 + A_index]
         ; switchDesktopByNumber(member)
+        
+        if(m == "" || m < 1) {   ;mId 沒有值, mId < 1 無效參數, 不處理
+            continue
+        }
+
         switchDesktopByNumber(m)
         sleep 500
         WinActivate, %res_game_window_title%
@@ -377,6 +397,9 @@ BnsPcTeamMembersRetreatToLobby(onlyLastConfirm := 1) {
 
         ;預設只檢查最後一個組員進副本讀完圖(前面不檢查以節省時間)
         confirm := (onlyLastConfirm) ? ((A_index == members) ? 1 : 0) : 1
+
+        BnsStopAutoCombat()
+        sleep 500
 
         ret += BnsOuF8GobackLobby(confirm)
         sleep 100

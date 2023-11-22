@@ -100,7 +100,7 @@ BnsDroidMission_WS_ExperienceATM() {
     ;關閉 CE 加速
     BnsStopHackSpeed()
 
-    ;BnsDroidSkill_ProtectBeforeFighting(ROLE_TYPE)
+    ;BnsDroidSkill_ProtectBeforeFighting(BnsRoleType())
     
     ;使用自動戰鬥轉向
     BnsStartStopAutoCombat()
@@ -109,7 +109,7 @@ BnsDroidMission_WS_ExperienceATM() {
 
     sleep 7000
 
-    BnsDroidSkill_ProtectBeforeFighting(ROLE_TYPE)
+    BnsDroidSkill_ProtectBeforeFighting(BnsRoleType())
 
     sleep 2000
 

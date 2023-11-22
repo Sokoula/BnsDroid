@@ -25,21 +25,27 @@ Class BnsDroidChimeraLab {
 
     SPECIAL_STAGE_HANDLE := 0    ;
 
-    ; FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
     FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
     
-    ; FIGHTING_MEMBER := "1"    ;action member 
-    ; FIGHTING_MEMBER := "1,2,3,4"    ;action member 
-    FIGHTING_MEMBER := "1,2,3"    ;action member 
-    ; FIGHTING_MEMBER := "1,2"    ;action member 
-
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2"    ;action member 
+    ; FIGHTING_MEMBERS := "1"    ;action member 
 
     ;戰鬥成員狀態(array)
     fighterState := [1,1,1,1]
 
 
-    ;是否完成特殊機制, 只在 SPECIAL_STAGE_HANDLE = 1 作用
-    isStageSpecialDone := 0    
+    ;傳點類別
+    TELEPORT_TYPE :=
+
+    ;左傳點座標
+    L_AREA_TP_X :=
+    L_AREA_TP_Y :=
+
+    ;右傳點座標
+    R_AREA_TP_X :=
+    R_AREA_TP_Y :=
 
 
 ;================================================================================================================
@@ -68,8 +74,6 @@ Class BnsDroidChimeraLab {
     ;* @return - 1: success; 0: failed
     ;------------------------------------------------------------------------------------------------------------
     start() {
-        this.isStageSpecialDone := 0    ;重置特殊機制 flag
-
 
         switch this.FIGHTING_MODE
         {
@@ -104,6 +108,7 @@ Class BnsDroidChimeraLab {
     ;* @return - 1: success; 0: failed
     ;------------------------------------------------------------------------------------------------------------
     runnableAlone() {
+
     }
 
 
@@ -113,9 +118,37 @@ Class BnsDroidChimeraLab {
     ;* @return - 1: success; 0: failed
     ;------------------------------------------------------------------------------------------------------------
     runnableSpecific() {
-        ret := 0
+        this.runStageClearEnteryGateB3()
 
-        return ret
+        if(this.runStageClearMiniBoss1st() != 2) {
+            this.runStageClearGasRoom()
+            this.runStagePassPoisonPool()
+        }
+
+        this.runStageClearMiniBoss2nd()
+        
+        loop {
+            ret := this.runStageFightFinalBoss()
+
+            if(ret == 0) {
+                ;復活重來
+                BnsStopAutoCombat()
+
+                sleep 8000
+                loop 10 {
+                    ControlSend,,{4}, %res_game_window_title%
+                    sleep 100
+                }
+                sleep 6000
+                BnsWaitMapLoadDone()
+                sleep 2000
+
+                this.takeDragonPulse(3) ;搭龍脈回去
+            }
+            else {
+                break
+            }
+        }
     }
 
 
@@ -133,9 +166,9 @@ Class BnsDroidChimeraLab {
 ;█ Functions - STAGE
 ;================================================================================================================
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 第一階段: 開啟小王房門
+    ;■ 第一階段: 開啟 B3 入口閘門
     ;------------------------------------------------------------------------------------------------------------
-    runStageClearGate() {
+    runStageClearEnteryGateB3() {
         ShowTipI("●[Mission1] - Start to clear the enemies and reach the Gate")
 
         ;開場房間
@@ -148,22 +181,8 @@ Class BnsDroidChimeraLab {
         BnsStopAutoCombat()
 
         ;人肉電梯
-        ShowTipI("●[Mission1] - Fall down to B1")
-        BnsActionSprintToPosition(2000, -2770)
-        msleep(1000)
-        ControlSend,,{Space}, %res_game_window_title%
-        ShowTipI("●[Mission1] - Fall down to B2")
-        BnsActionSprintToPosition(5000, -2630)
-        ControlSend,,{Space}, %res_game_window_title%
-        msleep(1500)
-        ControlSend,,{Space}, %res_game_window_title%
-        ShowTipI("●[Mission1] - Fall down to B3")
-        BnsActionSprintToPosition(3140, -3670)
-        ControlSend,,{Space}, %res_game_window_title%
-        msleep(1800)
-        ControlSend,,{Space}, %res_game_window_title%
-        msleep(200)
-        ControlSend,,{Space}, %res_game_window_title%
+        ShowTipI("●[Mission1] - Fall to B3")
+        this.actionGoFallToB3()
 
         ;等待脫戰
         loop {
@@ -175,356 +194,260 @@ Class BnsDroidChimeraLab {
 
         sleep 1500
 
-        ;清除隨機閘門區
-        BnsActionSprintToPosition(2800, -1900, 1)
-        BnsActionSprintToPosition(4340, -2000, 2)
-        BnsActionSprintToPosition(3700, -1700, 4)
-        
-        sleep 3000
+        ;清除隨機閘門區, 移動引怪
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(2800, -1900)
+        sleep 1200
+        BnsActionSprintToPosition(4340, -2000)
+        sleep 1200
+        BnsActionSprintToPosition(3700, -1700)
+        sleep 2000
+
+        ;是否是需要清怪
         if(BnsIsLeaveBattle()) {
             ShowTipI("●[Mission1] - Second Gate has open, mission completed")
         }
         else {
             ShowTipI("●[Mission1] - Clear second gate area")
-
+            BnsStartHackSpeed()
             BnsStartAutoCombat()
             sleep 1000
-            BnsIsEnemyClear(3000, 30)
-            BnsStopAutoCombat()
 
-            BnsActionSprintToPosition(3700, -300)
+            BnsIsEnemyClear(1000, 20)
+            BnsStopAutoCombat()
+            BnsActionSprintToPosition(3700, -1700)
+
+            BnsActionSprintToPosition(3700, -300)   ;引誘門口3氣功
+            sleep 1500
             BnsActionSprintToPosition(3700, -1500)
-            sleep 6000
+            sleep 6000                              ;等3氣功離開門口
             BnsActionAdjustDirection(90)
             BnsStartAutoCombat()
-            BnsIsEnemyClear(500, 30)
+            BnsIsEnemyClear(3000, 30)
             BnsStopAutoCombat()
+            BnsStopHackSpeed()
 
             ShowTipI("●[Mission1] - Enermy clear, mission completed")
         }
-        
+
         BnsActionAdjustDirection(90)
+        sleep 1000
 
         return 1
     }
 
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 第二階段: 爬樹到一王
-    ;------------------------------------------------------------------------------------------------------------
-    ;上右 1
-    runStageClimbTree1() {
-        ret := 0
-
-        ret := BnsActionSprintToPosition(-4550, 7500,,15000,5)  ;1號藤前
-        ret := BnsActionSprintToPosition(-3840, 8540,,15000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 1-1 failed")
-            return 0
-        }
-
-        sleep 1000
-        BnsStartHackSpeed()
-        BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 10)
-        BnsStopAutoCombat()
-        BnsStopHackSpeed()
-        sleep 3000
-
-        ret := BnsActionSprintToPosition(-3860, 9730,,15000,5)
-        ret := BnsActionSprintToPosition(-4510, 10660,,15000,5)
-        ret := BnsActionSprintToPosition(-5480, 10820,,15000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 1-2 failed")
-            return 0
-        }
-
-        sleep 1000
-        BnsStartHackSpeed()
-        BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 10)
-        BnsStopAutoCombat()
-        BnsStopHackSpeed()
-        sleep 3000
-
-        ret := BnsActionSprintToPosition(-6840, 10870,,15000,5)
-        ret := BnsActionSprintToPosition(-8140, 10670,,15000,5)
-        ret := BnsActionSprintToPosition(-9990, 8340,,15000,5)
-        sleep 1000
-        ret := BnsActionSprintToPosition(-9630, 7300,,15000,5)
-
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 1-3 failed")
-            return 0
-        }
-
-        ShowTipI("●[Mission2] - Climb vine 1 Success")
-        return 1
-    }
-
-
-    ;上左 2
-    runStageClimbTree2() {
-        ret := 0
-        ret := BnsActionSprintToPosition(-6180, 7400,,15000,5)  ;2號藤前
-        ret := BnsActionSprintToPosition(-6690, 8460,,15000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 2-1 failed")
-            return 0
-        }
-
-        sleep 1000
-        BnsStartHackSpeed()
-        BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 10)
-        BnsStopAutoCombat()
-        BnsStopHackSpeed()
-        sleep 3000
-
-        ret := BnsActionSprintToPosition(-7800, 8840,,15000,5)
-        ret := BnsActionSprintToPosition(-8421, 8090,,15000,5)
-        sleep 1000
-        ret := BnsActionSprintToPosition(-8882, 7246,,30000,5)
-
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 2-2 failed")
-            return 0
-        }
-        
-        ShowTipI("●[Mission2] - Climb vine 2 Success")
-        return 1
-    }
-    
-    
-    ;下右 3
-    runStageClimbTree3() {
-        ret := 0
-        ret := BnsActionSprintToPosition(-4600, 5000,,15000,5)  ;3號藤前
-        ret := BnsActionSprintToPosition(-4120, 4000,,15000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 3-1 failed")
-            return 0
-        }
-
-        sleep 1000
-        BnsStartHackSpeed()
-        BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 10)
-        BnsStopAutoCombat()
-        BnsStopHackSpeed()
-        sleep 3000
-
-        ;1樓到2樓
-        ret := BnsActionSprintToPosition(-4350, 3000,,15000,5)
-        ret := BnsActionSprintToPosition(-5580, 2850,,15000,5)
-        ret := BnsActionSprintToPosition(-5810, 2700,,15000,5)
-        ret := BnsActionSprintToPosition(-6700, 2970,,15000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 3-2 failed")
-            return 0
-        }
-
-
-        sleep 1000
-        BnsStartHackSpeed()
-        BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 10)
-        BnsStopAutoCombat()
-        BnsStopHackSpeed()
-        sleep 3000
-
-        ;2樓到一王
-        ret := BnsActionSprintToPosition(-8100, 3440,,15000,5)
-        ret := BnsActionSprintToPosition(-9321, 4288,,15000,5)
-        sleep 1000
-        ret := BnsActionSprintToPosition(-9435, 5100,,15000,5)
-
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 3-3 failed")
-            return 0
-        }
-        
-        ShowTipI("●[Mission2] - Climb vine 3 Success")
-        return 1
-    }
-
-    
-    ;下左 4
-    runStageClimbTree4() {
-        ret := 0
-        ret := BnsActionSprintToPosition(-6400, 5000,,15000,5)  ;4號藤前
-        ret := BnsActionSprintToPosition(-7080, 3940,,15000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 4-1 failed")
-            return 0
-        }
-
-        sleep 1000
-        BnsStartHackSpeed()
-        BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 10)
-        BnsStopAutoCombat()
-        BnsStopHackSpeed()
-        sleep 3000
-
-        ;2樓到一王
-        ret := BnsActionSprintToPosition(-8100, 3440,,15000,5)
-        ; BnsActionSprintToPosition(-9250, 3970,,15000,5)
-        ret := BnsActionSprintToPosition(-9321, 4288,,15000,5)
-        sleep 1000
-        ret := BnsActionSprintToPosition(-9435, 5100,,15000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 4-2 failed")
-            return 0
-        }
-
-        ShowTipI("●[Mission2] - Climb vine 4 Success")
-        return 1
-    }
-
-    ;中左 5 (直達車)
-    runStageClimbTree5() {
-        ret := 0
-        ret := BnsActionSprintToPosition(-6900, 6200,,15000,5)  ;5號藤前
-        ret := BnsActionSprintToPosition(-8000, 6250,,35000,5)
-        if(ret == 0) {
-            ShowTipE("●[Mission2] - Climb vine 5 failed")
-            return 0
-        }
-
-        ShowTipI("●[Mission2] - Climb vine 5 Success")
-        return 1
-    }
-
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 第一階段: 對戰一王
+    ;■ 第二階段: 對戰一王
     ;* @return - 1: success; 0: failed
     ;------------------------------------------------------------------------------------------------------------
-    runStageFightBoss1(members := "1") {
-
-        ShowTipI("●[Mission3] - start to fight")
-
-        ; this.startTeamAutoCombat(this.FIGHTING_MEMBER)
+    runStageClearMiniBoss1st() {
+        ShowTipI("●[Mission2] - Clear gate of B4 Boss1 room")
+        BnsStartHackSpeed()
+        ; BnsActionSprintToPosition(3720, 3200)
         ; sleep 1000
+        ; BnsStopHackSpeed()
+        BnsActionSprintToPosition(3728, 4770)   ;一王前閘門
+        sleep 2000
 
-        ; ;進入戰鬥
-        ; sleep 10000
+        ShowTipI("●[Mission2] - Clear enermies of B4 gate")
+        BnsStartAutoCombat()
+        BnsIsEnemyClear(1000, 30)
+        BnsStopAutoCombat()
 
-        ; if(BnsIsEnemyDetected() > 0) {
-            BnsStartHackSpeed()
+        ShowTipI("●[Mission2] - Go to fight mini boss1")
+        BnsActionSprintToPosition(3740, 5430, 0x1)  ;一王前走廊
+        BnsActionSprintToPosition(5000, 5600, 0x2)
+        BnsActionSprintToPosition(4290, 8840, 0x4)
 
-            this.startTeamAutoCombat(members)
-            sleep 1000
+        ShowTipI("●[Mission2] - fight mini boss1...")
+        BnsStartAutoCombat()    ;對戰一王
+        
+        dsleep(5000)
+        BnsStopAutoCombat()
+        ControlSend,,{q}, %res_game_window_title%
+        BnsStartAutoCombat()
+        
+        dsleep(6500)
+        BnsStopAutoCombat()
+        ControlSend,,{e}, %res_game_window_title%
+        BnsStartAutoCombat()
+        if(BnsIsEnemyClear(1500, 300) != 1) {
+            return 0
+        }
+        BnsStopAutoCombat()
+        BnsStopHackSpeed()
 
-            if(BnsIsEnemyClear(1500, 60) == 1) {    ;允許丟失目標 1.5秒, 超時時間 60 秒
-                ;預留撿箱時間
-                ; sleep 3000
+        ;開啟龍脈
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(3190, 9060)
+        sleep 1500
 
-                ;預留撿箱時間
-                ; BnsIsLeaveBattle(3000)    ;等待脫戰
+        if(BnsIsAvailableTalk() != 0) {
+            ShowTipI("●[Mission3] - trigger dragon pulse")
+            ControlSend,,{f}, %res_game_window_title%
+            sleep 5000
+        }
+        BnsStopHackSpeed()
 
-                ;this.stopTeamAutoCombat()
+        ;確認龍脈
+        BnsActionSprintToPosition(2750, 8900)
+        sleep 1500
+        if(BnsIsAvailableTalk() != 0) {
+            ShowTipI("●[Mission3] - Detected dragon pulse")
+            ControlSend,,{f}, %res_game_window_title%
+            return 2
+        }
 
-                ShowTipI("●[Mission3] - completed")
+        return 1
+    }
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 第三階段: 清理瓦斯毒氣室
+    ;* @return - 1: success; 0: failed
+    ;------------------------------------------------------------------------------------------------------------
+    runStageClearGasRoom() {
+
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(-840, 8862)  ;第一引怪點
+        BnsStartAutoCombat()
+        BnsIsEnemyClear(1000, 30)
+        BnsStopAutoCombat()
+
+        BnsActionSprintToPosition(-4720, 8900)  ;第二引怪點
+        sleep 1000
+
+        BnsStartHackSpeed()
+        BnsStartAutoCombat()
+        BnsIsEnemyClear(1000, 30)
+        BnsStopAutoCombat()
+        BnsStopHackSpeed()
+
+        loop 3 {
+            BnsActionSprintToPosition(-4570, 7740)  ;防毒機關
+         
+            if(BnsIsAvailableTalk() != 0) {
+                ShowTipI("●[Mission3] - disable poison gas mechanism")
+                ControlSend,,{f}, %res_game_window_title%
+                sleep 5000
             }
             else {
-                ;2分鐘都無法接觸鎖定目標，角色卡住了
-                ShowTipE("●[Mission3] - Exception: timeout")
-                return 0
+                break
             }
-        ; }
-        ; else {
-            ; sleep 100
-            ; this.stopTeamAutoCombat()
-            ; ShowTipE("●[Exception] - boss1 not found")
-            ; return 0
-        ; }
+        }
 
-        this.stopTeamAutoCombat(members)
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(-4920, 7180, 0x1)     ;樓梯
+        BnsActionSprintToPosition(-6890, 7180, 0x4)     ;樓梯
         BnsStopHackSpeed()
-        ShowTipI("●[Mission3] - completed")
+        BnsActionAdjustDirection(270)                   ;調整方向
+        BnsWaitingLeaveBattle()
+        BnsActionSprintJump(1600)
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(-6840, 5720, 0x1)     ;對面平台
+        BnsActionSprintToPosition(-6340, 5420, 0x4)     ;對面平台往毒池
+        BnsStopHackSpeed()
 
         return 1
     }
 
 
-
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 第三階段: 對戰尾王
+    ;■ 第四階段: 飛越毒池
     ;* @return - 1: success; 0: failed
     ;------------------------------------------------------------------------------------------------------------
-    runStageFightFinalBoss(members := "1") {
-        ShowTipI("●[Mission4] - start to fight")
+    runStagePassPoisonPool() {
+        this.actionPassPoisonPool()
 
-        this.fighterState := [1,1,1,1]    ;生存名單
+        sleep 1000
+        if(BnsIsAvailableTalk() != 0) {
+            ShowTipI("●[Mission4] - Turn off gas")
+            ControlSend,,{f}, %res_game_window_title%
+            sleep 3000
+        }
+        ; BnsActionSprintToPosition(-6240, -2304)  ;龍脈
+        
+        return 1
+    }
 
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 第五階段: 對戰二王
+    ;* @return - 1: success; 0: failed
+    ;------------------------------------------------------------------------------------------------------------
+    runStageClearMiniBoss2nd() {
+        ShowTipI("●[Mission5] - fighting to mini boss2")
+        BnsActionSprintToPosition(-6300, -2920)  ;二王攻擊位置
+
+        BnsStartHackSpeed()
+        BnsStartAutoCombat()
+        BnsActionAdjustCamaraAltitude(330)  ;往下看,避免環境取色誤判
+        BnsIsEnemyClear(1500, 30)
+        BnsStopAutoCombat()
+        BnsStopHackSpeed()
+
+        return 1
+    }
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 第六階段: 對戰尾王
+    ;* @return - 1: success; 0: failed
+    ;------------------------------------------------------------------------------------------------------------
+    runStageFightFinalBoss() {
         ret := 0
 
-        ;是否開啟特殊機制的保護機制
-        fnSSHandler := (this.SPECIAL_STAGE_HANDLE) ? func(this.isSpecialStageDetected.name).bind(BnsDroidChaosBlackShenmu) : 0
+        ;前往尾王
+        this.actionGoToFinalRoom()
 
-        ;補充動作計時器
-        ; fnAdditional := func("BnsPcTeamMemberAction").bind(func(this.actionAdditional.name).bind(this), StrSplit(this.FIGHTING_MEMBER, ","),1)    ;mid 引數
-        fnAdditional := func(this.actionAdditional.name).bind(this)
+        ;判定傳送點
+        this.TELEPORT_TYPE := this.detectTeleportType()
+        ShowTipI("●[Mission6] - start fight final boss")
 
-        ;戰鬥條件脫離
-        fnEscape := func(this.isFightEscape.name).bind(this)
+        BnsStartHackSpeed()
+        ;開打BOSS, 每9秒就啟動換邊
 
-        ; sleep 3000
+        loop {
+            ShowTipI("●[Mission6] - fighting...")
+            BnsStartAutoCombat()
 
-        BnsActionWalkCircle(-7100, 5630, -180)  ;繞到王的背面(避免隊友被打飛)
-        BnsActionWalk(2000)    ;前進到可鎖定BOSS的範圍
-        
-        if(BnsIsEnemyDetected() > 0) {
-            ; SetTimer, % fnAdditional, 31000    ;啟動迴避黑水保護計時器
+            state := this.fightStateChanged()
+            ShowTipI("●[Mission6] - on fighting state changed, state: " state)
 
-            this.actionPrefix()    ;開王前準備動作
+            switch state {
+                case 1, 2:   ;交換對戰區域
+                    ShowTipI("●[Mission6] - switch fighting Area")
+                    BnsStopAutoCombat()
 
-            BnsStartHackSpeed()
+                    if(this.getBossArea() == 0) {   ;身在左邊
+                        BnsActionSprintToPosition(this.L_AREA_TP_X, this.L_AREA_TP_Y,, 3000)   ;走傳點到毒雪
+                        ; BnsActionSprintToPosition(this.L_AREA_TP_X, this.L_AREA_TP_Y)   ;走傳點到毒雪
+                    }
+                    else {  ;身在右邊
+                        BnsActionSprintToPosition(this.R_AREA_TP_X, this.R_AREA_TP_Y,, 3000)   ;走傳點到惡延
+                        ; BnsActionSprintToPosition(this.R_AREA_TP_X, this.R_AREA_TP_Y)   ;走傳點到惡延
+                    }
 
-            this.startTeamAutoCombat(members)
-            sleep 1000
+                    sleep 1000
+                    BnsStartAutoCombat()
 
-            ; fight := BnsIsEnemyClear(10000, 480, fnSSHandler, fnEscape)
-            fight := BnsIsEnemyClear(8000, 480, 0, fnEscape)
+                case 3:     ;戰鬥結束
+                    ShowTipI("●[Mission6] - Mission completed")
+                    ret := 1
+                    break
 
-            ; ShowTipI("●[Mission4] - stop additional action timer")
-            ; SetTimer, % fnAdditional, delete    ;判除迴避黑水保護計時器
-
-            if(fight >= 1)    ;completed
-            {    
-                ;預留撿箱時間
-                
-                ; BnsIsLeaveBattle(3000)    ;等待脫戰
-                ; this.stopTeamAutoCombat(this.FIGHTING_MEMBER)
-                ShowTipI("●[Mission4] - completed, ret:" fight)
-
-                ret := 1
+                case 4:     ;角色死亡
+                    ShowTipI("●[Mission6] - WARNING, charactor dead")
+                    ret := 0
+                    break
             }
-            else if(fight == 0) {    ;timeout 
-                ;2分鐘都無法接觸鎖定目標，角色卡住了
-                ShowTipE("●[Mission4] - Exception: timeout")
-                ret := 0
-            }
-            else {    ;escape condition
-                ShowTipE("●[Mission4] - Exception: fighter all gone")
-                ret := fight
-            }
-
-            BnsStopHackSpeed()
         }
-        else {
-            ; SetTimer, % fnAdditional, delete    ;判除迴避黑水保護計時器
-            sleep 100
-            this.stopTeamAutoCombat(members)
-            ShowTipE("●[Mission4] - Exception: boss not found")
-            ret := 0
-        }
+
+        BnsStopHackSpeed()
 
         return ret
-    }
+    }        
 
 
     ;------------------------------------------------------------------------------------------------------------
@@ -532,32 +455,18 @@ Class BnsDroidChimeraLab {
     ;* @return - none
     ;------------------------------------------------------------------------------------------------------------
     runStageEnding() {
-        ShowTipI("●[Mission5] - pick reward")
-        ;執行 pickReward
-        fn := func(this.pickReward.name).bind(this)
+        ;暫時方案
+        BnsStartHackSpeed()
+        if(this.getBossArea() != 1) {   ;不是在毒雪房(右), 移動到毒雪房
+            BnsActionSprintToPosition(this.L_AREA_TP_X, this.L_AREA_TP_Y,, 3000)
+        }
 
-        ;戰鬥組員
-        BnsPcTeamMemberAction(fn, StrSplit(this.FIGHTING_MEMBER, ","), 1, 0)  ; 回傳執行mId, 不切回 leader 
+        BnsStopHackSpeed()
+        BnsStartAutoCombat()
+        sleep 5000
+        BnsStopHackSpeed()
 
-        ; ;掛件組員
-        ; BnsPcTeamMemberAction(fn,StrSplit("4", ","), 1, 0)  ; 回傳執行mId, 不切回 leader
-        sleep 2000    ;等待最後一員龍脈動畫
-    
-        this.startTeamAutoCombat()    ;TODO
-        sleep 5000    ;等待撿箱
-
-        ;如果不是全模式, 掛件們去尾王房撿箱
-        ; fn := func("BnsDroidChaosBlackShenmu.takeDragonPulse").bind(BnsDroidChaosBlackShenmu, 2)    
-        ; BnsPcTeamMemberAction(fn,StrSplit("3,4", ","))
-        ; sleep 6000
-
-        ; this.startTeamAutoCombat("3,4")    ;TODO
-        ; sleep 5000    ;等待撿箱
-    
-        ; fn := func("BnsOuF8GobackLobby").bind(0)    ;0: 不確認是否回等候成功
-        ; BnsPcTeamMemberAction(fn,StrSplit)    ;全員回到等候室
-        
-        ; return
+        BnsWaitingLeaveBattle()
     }
 
 
@@ -568,274 +477,183 @@ Class BnsDroidChimeraLab {
 ;================================================================================================================
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 搭乘龍脈 
-    ;* @param cate - indentify for each dragon pulse(if more then one dragon pulse).
-    ;* @return - none
+    ;■ 人肉電梯
     ;------------------------------------------------------------------------------------------------------------
-    takeDragonPulse(cate) {
-        DumpLogD("●[Action] - " A_ThisFunc "  cate: " cate)
-
-        switch cate
-        {        
-            case 0:         ;開場龍脈
-                BnsActionSprintToPosition(16583, -7870)
-
-            case 1:         ;崖前小王龍脈(red)
-                BnsActionSprintToPosition(16220, -8040)
-
-            case 2:         ;崖前尾王龍脈(red)
-                BnsActionSprintToPosition(16330, -8180)
-            
-            case 3:         ;小王房龍脈
-                BnsActionSprintToPosition(-10170, 6430)
-
-        }
-
-        sleep 500
-        ControlSend,,{f}, %res_game_window_title%
-
-    }
-
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 前往一王 ****
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    navigateToBoss1(type := -1) {
-        if(BnsGetPosZ() between -808 and 848) {   ;副本起始點 Z = -828
-            kind := 1
-        }
+    actionGoFallToB3() {
+        ;人肉電梯
+        BnsActionSprintToPosition(2000, -2770)
+        msleep(1000)
+        ControlSend,,{Space}, %res_game_window_title%
         
-        type := (type < 0) ? kind : type
-
-        DumpLogD("●[Action] - " A_ThisFunc "  type: " type)
-
-        switch type {
-            case 0:     ;走地圖過去
-                ;TBD
-            
-            case 1:     ;副本起始點
-                this.takeDragonPulse(1)
-
-        }
-    }
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 前往尾王 ****
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    navigateToFinalBoss(type := -1) {
-        kind := 0
-
-        if(BnsGetPosZ() > -878 && BnsGetPosZ() < -778) {
-            kind := 1
-        }
-
-        if(BnsGetPosZ() > 3352 && BnsGetPosZ() < 3452) {
-            kind := 2
-        }
-
-        type := (type < 0) ? kind : type
-
-        ShowTipI("●[Action] - " A_ThisFunc " Move to final BOSS room, type: " type)
-
-        switch type {
-            case 0:     ;走地圖過去
-                ;TBD
-
-            case 1:     ;副本起始點(先到小王房)
-                this.navigateToBoss1()
-                sleep 6000
-                this.takeDragonPulse(3)
-
-            case 2:     ;一王房內
-                this.takeDragonPulse(3)
-
-        }
-    }
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 重回尾王 ****
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    backToFightFinalBoss(mIds := "") {
-        DumpLogD("●[Action] - " A_ThisFunc)
-
-        ;戰鬥成員復活
-        fn := func(this.resurrection.name).bind(this)
-        BnsPcTeamMemberAction(fn, StrSplit(mIds, ","), 1)
-
-        fn := func(this.takeDragonPulse.name).bind(this, 2)
-        BnsPcTeamMemberAction(fn, StrSplit(mIds, ","), 1)
-
-        sleep 6000    ;等待最後一員的龍脈動畫
-    }
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 團隊競標 ****
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    teamBidding() {
-        DumpLogD("●[Action] - " A_ThisFunc)
-        BnsPcTeamMembersBidding(2)
-    }
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 撿取戰利品 ****
-    ;* @return - none
-    ;-------------------------------------------------------------------------------------------------------BnsIsAvailableTalk()-----
-    pickReward(mId := "") {
-        DumpLogD("●[Action] - " A_ThisFunc)
-
-        if(inStr(this.FIGHTING_MEMBER, mId) != 0) {    ;戰鬥成員
-            if(BnsIsCharacterDead() == 1) {    ;角色死亡
-                ShowTipI("●[Action] - pickReward " mId " is dead, do resurrection and go back to pick reward")
-                this.resurrection()
-                ; BnsStartAutoCombat()  ;start
-            }
-            else {    ;角色存活, 無需處理
-                ; BnsStopAutoCombat()    ;stop
-                return     
-            }
-        }
-
-        this.takeDragonPulse(2)
-    }
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 角色復活 ****
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    resurrection(mId := "") {
-        DumpLogD("●[Action] - " A_ThisFunc)
-        BnsStopAutoCombat()    ;stop
-
-        ControlSend,,{4}, %res_game_window_title%    ;復活
-        sleep 6000    ;等待動畫
-        BnsWaitMapLoadDone()
-        sleep 1000
-        ; this.takeDragonPulse(2)
-        ; sleep 5000    ;等待動畫
-    }
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 繞圈移動 ****
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    circledAroundAltar(deltaDegree, times := 1) {
-        ALTAR_X := -5380
-        ALTAR_Y := 6237
-
-        times := (times == 0) ? times := 2147483647 : 1
-
-        loop %times% {
-            BnsActionWalkCircle(ALTAR_X, ALTAR_Y, deltaDegree)
-        }
-    }
-
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 全員開啟自動戰鬥
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    startTeamAutoCombat(mids := 0) {
-        midsArray := 0
-        fn := func("BnsStartAutoCombat")
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(5000, -2630)
+        BnsStopHackSpeed()
+        ControlSend,,{Space}, %res_game_window_title%
+        msleep(1500)
+        ControlSend,,{Space}, %res_game_window_title%
         
-        if(mids) {
-            midsArray := StrSplit(mids, ",")
-        }
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(3140, -3670)
+        BnsStopHackSpeed()
+        ControlSend,,{Space}, %res_game_window_title%
+        msleep(1800)
+        ControlSend,,{Space}, %res_game_window_title%
+        msleep(200)
+        ControlSend,,{Space}, %res_game_window_title%        
 
-        ; BnsPcTeamMemberAction(fn)    ;全員開始自動戰鬥
-        BnsPcTeamMemberAction(fn, midsArray)    ;全員開始自動戰鬥
+        return 1
     }
 
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 全員停止自動戰鬥
-    ;* @return - none
+    ;■ 飛越毒池
     ;------------------------------------------------------------------------------------------------------------
-    stopTeamAutoCombat(mids := 0) {
-        midsArray := 0
-        fn := func("BnsStopAutoCombat")
-        
-        if(mids) {
-            midsArray := StrSplit(mids, ",")
-        }
+    actionPassPoisonPool() {
+        BnsStopHackSpeed()
+        BnsActionSprintToPosition(-6330, 4882)  ;毒池跳台
+        BnsActionWalkToPosition(-6000, 2920, 0x1, 1000)  ;目標毒池中繼點跳涯
+        dsleep(30)
+        ControlSend,,{Space}, %res_game_window_title%   ;滑翔
+        dsleep(30)
 
-        BnsPcTeamMemberAction(fn, midsArray)    ;全員停止自動戰鬥
+        BnsStartHackSpeed()
+        BnsActionWalkToPosition(-6000, 2920, 0x2)  ;毒池中繼點
+        BnsStopHackSpeed()
+
+        BnsActionSprintToPosition(-6020, 920, 0x4)  ;毒池對岸
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(-6240, 450)  ;毒池出口前樓梯
+        BnsActionSprintToPosition(-6240, -1740)  ;毒池機關
+        BnsStopHackSpeed()
+
+        return 1
     }
 
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 黃面機制處理-開始
-    ;* @return - none
+    ;■ 前往尾王
     ;------------------------------------------------------------------------------------------------------------
-    yellowFaceHandle(cate) {    ;1:進機制, 2:出機制
-        if(cate == 1) { ;進機制
-            ShowTipD("perform special stage handle Begin")
-            BnsStartStopAutoCombat()    ;stop
-            
-            ;貼牆遠離BOSS
-            BnsActionRotationDegree180()
-            BnsActionWalk(2000)
-            BnsActionRotationDegree180()
-        }
-        else {    ;出機制
-            ShowTipD("perform special stage handle End")
-            BnsActionWalk(500)
-            BnsStartStopAutoCombat()    ;start 
-        }
+    actionGoToFinalRoom() {
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(-6300, -7350)  ;王房分叉口
+
+        ;右邊
+        ; BnsActionSprintToPosition(-8734, -8200)  ;右轉(地圖左邊)
+        ; BnsActionSprintToPosition(-7930, -10490,, 2000)  ;左邊王房
+
+        ;左邊
+        BnsActionSprintToPosition(-3820, -8200)  ;左轉(地圖左邊)
+        BnsActionSprintToPosition(-3820, -9850,, 900)  ;右邊王房
+
+        ControlSend,,{Space}, %res_game_window_title%
+        msleep(100)
+        ControlSend,,{Space}, %res_game_window_title%
+        BnsActionSprintToPosition(-3820, -9850)  ;右邊王房
+        BnsStopHackSpeed()
+
+        return 1
     }
 
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 前置動作
-    ;* @return - none
+    ;■ 搭龍脈
     ;------------------------------------------------------------------------------------------------------------
-    actionPrefix(arg := 0, mid := 0) {
-        send {``}
-        sleep 100
-        
-        send {tab}
-    }
+    takeDragonPulse(cate := 0) {
+        switch cate {
+            case 1: ;門口 - 一王前龍脈
 
+            case 2: ;一王後 - 二王前龍脈
 
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 補充動作
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    actionAdditional(mid := 0) {
-        DumpLogD("●[Action] - " A_ThisFunc ", mid:" mid)
-
-        fighters := StrSplit(this.FIGHTING_MEMBER, ",")
-
-        For i, f in fighters
-        {
-            if(fighters[f] == 0) {  ;隊員死掉便不做事
-                continue
-            }
-
-            switchDesktopByNumber(fighters[f])
-            sleep 500
-            WinActivate, %res_game_window_title%
-            sleep 200
-
-            ;放星
-            Send {``}
-            sleep 200
-
+            case 3: ;尾王直達龍脈
+                BnsActionSprintToPosition(880, -665, 0x1)  ;入口門前
+                BnsActionSprintToPosition(830, -950, 0x2)  ;入口門後
+                BnsActionSprintToPosition(530, -1160, 0x4)  ;尾王龍脈
+                sleep 300
+                if(BnsIsAvailableTalk() != 0) {
+                    ShowTipI("●[Mission3] - Detected dragon pulse")
+                    ControlSend,,{f}, %res_game_window_title%
+                    sleep 8000
+                }
         }
-    
+
     }
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 判定傳送點
+    ;------------------------------------------------------------------------------------------------------------
+    ;傳送點類別;  [ return ] 1: ( | );  2: ( — ); 4: ( \ ); 8: ( / )
+    detectTeleportType() {
+        ret := 0
+
+        BnsStartHackSpeed()
+        BnsActionSprintToPosition(-3825, -10000) ;引王
+        dsleep(2000)
+
+
+        ;右邊 - 毒雪, 傳點偵測 -------------------------------------------------------
+        BnsActionSprintToPosition(-3830, -9740) ;毒雪, 試探12點傳點是否會換邊
+        dsleep(500)
+
+        if(this.getBossArea() == 0) {   ;確實換到了惡延區
+            ;毒雪區為 12 - 6 傳點 ( | )
+
+            ; 12點傳點
+            this.R_AREA_TP_X := -3830
+            this.R_AREA_TP_Y := -9740
+
+            DumpLogD("[●Action] detectTeleportType: RIGHT - A ( | )")
+            ret := ret | 0x01
+        }
+        else {  ;沒有變化, 不是傳點位置
+            ;毒雪區為9 - 3 傳點 ( — )
+
+            ; 9點傳點
+            this.R_AREA_TP_X := -4550
+            this.R_AREA_TP_Y := -10460
+
+            ;移動到惡延(左)
+            BnsActionSprintToPosition(this.R_AREA_TP_X, this.R_AREA_TP_Y)
+            dsleep(300)
+
+            DumpLogD("[●Action] detectTeleportType: RIGHT - B ( — )")
+            ret := ret | 0x02
+        }
+
+        ;左邊 - 惡延, 傳點偵測 -------------------------------------------------------
+        BnsActionSprintToPosition(-8240, -11000) ;惡延, 試探8點傳點是否會換邊
+        dsleep(4000)
+
+        if(this.getBossArea() == 1) {   ;確實換到了毒雪區
+            ;惡延區為 10 - 4 傳點 ( \ )
+
+            ; 4點傳點
+            this.L_AREA_TP_X := -8240
+            this.L_AREA_TP_Y := -11000
+
+            DumpLogD("[●Action] detectTeleportType: LEFT - A ( \ )")
+            ret := ret | 0x04
+        }
+        else {  ;沒有變化, 不是傳點位置
+            ;惡延區為 2 - 8 傳點 ( / )
+
+            ; 8點傳點
+            this.L_AREA_TP_X := -9280
+            this.L_AREA_TP_Y := -11020
+
+            ;移動到毒雪(右)
+            BnsActionSprintToPosition(this.L_AREA_TP_X, this.L_AREA_TP_Y)
+            dsleep(300)
+
+            DumpLogD("[●Action] detectTeleportType: LEFT - B ( / )")
+            ret := ret | 0x08
+        }
+
+        BnsStopHackSpeed()
+
+        return ret
+    }
+
 
 
 
@@ -843,60 +661,85 @@ Class BnsDroidChimeraLab {
 ;█ Functions - STATUS
 ;================================================================================================================
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 判斷開啟路線
+    ;■ 判定戰區
+    ;* @return - 0: left; 1: right
     ;------------------------------------------------------------------------------------------------------------
-    judgeVine() {
+    getBossArea() {
+        if(GetMemoryHack().getPosX() > -6300) {
+            DumpLogD("[State] getBossArea: Right(1)")
+            return 1    ;right
+        }
+        
+        DumpLogD("[State] getBossArea: Left(0)")
+        return 0    ;left
+    }
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 戰鬥狀態改變
+    ;* @return - 0: no; 1: yes
+    ;------------------------------------------------------------------------------------------------------------
+    fightStateChanged() {
         ret := 0
-        sx := WIN_CENTER_X - WIN_BLOCK_WIDTH
-        sy := WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 4
-        ex := WIN_CENTER_X + WIN_BLOCK_WIDTH
-        ey := WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 1
-        
-        BnsActionWalkToPosition(-5790, 6150)  ;祭壇西側觀察點
 
-        BnsActionAdjustCamaraAltitude(1.8)
+        tick := A_TickCount
 
-        loop 5 {
-            ; ShowTipI("detected vine: " A_index)
-            switch A_index {
-                case 1:
-                    BnsActionAdjustDirection(50)    ;  上右
+        loop {
 
-                case 2:
-                    BnsActionAdjustDirection(110)   ;  上左
-        
-                case 3:
-                    BnsActionAdjustDirection(312)   ;  下右
-    
-                case 4:
-                    BnsActionAdjustDirection(241)   ;  下左
-            
-                case 5:
-                    BnsActionAdjustDirection(177)   ;  左中
-                    
-            }
-
-            count := 0
-            loop 10 {
-                if(FindPixelRGB(sx, sy, ex, ey, 0xFDFDEF, 0x5) == 1) {
-                    count++
-                    ; ShowTipI("detected vine count: " count)
-                    if(count > 4) {
-                        ret := 1
-                        break
-                    }
-                }
-                sleep 200
-            }
-
-            ret := (ret == 1) ? ret := A_index : 0
-
-            if(ret > 0 ) {
+            if(BnsIsCharacterDead() > 0) {
+                ShowTipI("[State] - " A_ThisFunc ", character dead")
+                ret := 4
                 break
             }
+
+
+            if(this.getBossBlood() == 0 && this.isBoss()) {  ;結束戰鬥, 
+                ShowTipI("[State] - " A_ThisFunc ", boss clear")
+                ret := 3
+                break
+            }
+
+            if(this.getBossBlood() == 1 && this.isBoss()) {  ;單邊結束, 立即換邊
+                ShowTipI("[State] - " A_ThisFunc ", boss blood 1")
+                ret := 2
+                break
+            }
+
+            if(A_TickCount - tick > 8500) {    ;超時換邊
+                ShowTipI("[State] - " A_ThisFunc ", 10s times up")
+                ret := 1
+                break
+            }
+
+            sleep 100
         }
 
+        ShowTipI("●[Action] - " A_ThisFunc ", ret:" ret)
         return ret
+    }
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 確認BOSS血量
+    ;------------------------------------------------------------------------------------------------------------
+    getBossBlood() {
+        return GetMemoryHack().getMainTargetBlood()
+    }
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 確認BOSS血量白分比
+    ;------------------------------------------------------------------------------------------------------------
+    getBossBloodPercent(checkPoint) {
+        return floor(GetMemoryHack().getMainTargetBlood() / GetMemoryHack().getMainTargetBloodFull() * 100)
+    }
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 確認BOSS
+    ;------------------------------------------------------------------------------------------------------------
+    isBoss() {
+        return (GetMemoryHack().getMainTargetBloodFull() == 6855200000 || GetMemoryHack().getMainTargetBloodFull() == 7068400000)
     }
 
 
@@ -906,99 +749,9 @@ Class BnsDroidChimeraLab {
     ;* @return - 0: no action; 1~n: escape 
     ;------------------------------------------------------------------------------------------------------------
     isFightEscape() {
-        ; DumpLogD("●[Status] - " A_ThisFunc)
-        bossX := GetMemoryHack().getMainBossPosX()
-        bossY := GetMemoryHack().getMainBossPosY()
 
-
-        fighters := StrSplit(this.FIGHTING_MEMBER, ",")
-        deadCount := 0
-        leaderDid := 0
-
-        ; DumpLogD("●[Status] - " A_ThisFunc " 1:" fighters[1] ", 2:" fighters[2] ", 3:" fighters[3] ", 4:" fighters[4])
-        ; DumpLogD("●[Status] - " A_ThisFunc " Boss: " res_dungeon_chaos_block_shenmu_boss_name ", target: " GetMemoryHack().getMainTargetName() ", HP: " GetMemoryHack().getMainTargetBlood())
-
-        ;依目標名字及血量判斷(名字部份解析失敗, 每次掃到的offset 都不一樣)
-        ; if(GetMemoryHack().getMainTargetName() == res_dungeon_chaos_block_shenmu_boss_name && GetMemoryHack().getMainTargetBlood() == 0) {   ;偵測 boss 死掉
-        ;     DumpLogD("●[Status] - " A_ThisFunc "  detect BOSS gone")
-        ;     return 1
-        ; }
-
-        DumpLogD("●[Status] - " A_ThisFunc "  leave battle: " BnsIsLeaveBattle())
-        if(BnsIsLeaveBattle() == 1) {
-            DumpLogD("●[Status] - " A_ThisFunc "  detect BOSS gone")
-            sleep 3000  ;王一打死就會脫戰, 留3秒撿箱
-            return 1
-        }
-
-        ; if(DBUG >= 1) {
-        ;     DumpLogD("●[Status] - " A_ThisFunc " did: " BnsPcGetCurrentDid() ", dead:" BnsIsCharacterDead())
-        ; }
-
-        if(BnsIsCharacterDead() == 1 && this.fighterState[BnsPcGetCurrentDid()] == 1) {
-            DumpLogD("●[Status] - " A_ThisFunc "  detect dead:" BnsPcGetCurrentDid())
-            this.fighterState[BnsPcGetCurrentDid()] := 0
-        }
-
-        ; DumpLogD("●[Status] - " A_ThisFunc " fightstate: " this.fighterState[1] "," this.fighterState[2] "," this.fighterState[3] "," this.fighterState[4])
-
-
-        For i, f in fighters
-        {
-            deadCount += (this.fighterState[f] == 0) ? 1 : 0
-
-            ;死掉就換下一個還活著的接隊長
-            leaderDid := (leaderDid == 0 && this.fighterState[f] == 1) ? f : leaderDid
-
-            ; DumpLogD("●[Status] - " A_ThisFunc "  fighter: " f  ", dead count: " deadCount ", leaderDid: " leaderDid)
-        }
-
-
-        if(deadCount == fighters.length()) {    ;全部死光
-            DumpLogD("●[Status] - " A_ThisFunc "  return: " -1)
-            return -1
-        }
-
-        
-        if(leaderDid != getCurrentDesktopId()) {
-            DumpLogD("●[Status] - " A_ThisFunc "  switch to new leader desktop: " leaderDid)
-            switchDesktopByNumber(leaderDid)   ;隊長切到下一個組員
-            sleep 500
-            WinActivate, %res_game_window_title%
-        }
-
-        ; DumpLogD("●[Status] - " A_ThisFunc "  return: " 0)
-        return 0
     }
 
-
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ 特珠機制發生
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    isSpecialStageDetected() {
-        ; tfn := this["timerRun"].bind(this)
-        ; SetTimer, % tfn, 1000
-        
-        ; sleep 10000
-    
-        if(!this.isStageSpecialDone && this.detectBossBlood(80)) {
-            fnStart := func(this.yellowFaceHandle.name).bind(BnsDroidChaosBlackShenmu, 1)
-            BnsPcTeamMemberAction(fnStart,StrSplit("4",","))
-
-
-
-            ; ShowTipD("perform special stage handle end")
-            ; fnExit := func(this.yellowFaceHandle.name).bind(BnsDroidChaosBlackShenmu, 2)
-            ; BnsPcTeamMemberAction(fnExit,StrSplit("4",","))
-
-            fn := func(this.yellowFaceHandle.name).bind(BnsDroidChaosBlackShenmu, 2)
-            fnExit := func("BnsPcTeamMemberAction").bind(fn, StrSplit("4", ","),,, 100)
-            SetTimer, % fnExit, -10000    ;10秒後只執行1次, fnExit 是變數所以要用 % 加在前面
-
-            this.isStageSpecialDone := 1
-        }
-    }
 
 
     ;------------------------------------------------------------------------------------------------------------
@@ -1015,23 +768,7 @@ Class BnsDroidChimeraLab {
     }
 
 
-    ;------------------------------------------------------------------------------------------------------------
-    ;■ BOSS血量偵測
-    ;* @return - none
-    ;------------------------------------------------------------------------------------------------------------
-    detectBossBlood(blood) {
-        x := 790, y := 120,    w := 360, h := 18
-
-        x80 := x + floor(w * 0.79)
-        y80 := y + floor(h * 0.5)
-
-        g := GetColorGray(GetPixelColor(x80, y80))
-
-        if((g > 148 && g < 151) || g < 50) {
-            ShowTipD("detect boss blood in 80%, g=" g )
-            return 1
-        }
-        return 0
-    }
+        
+    
 
 }

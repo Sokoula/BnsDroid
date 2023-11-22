@@ -178,7 +178,7 @@ BnsDroidMission_GT_KillGateKeeper() {
 ;    Mission1 - 使用技能(非同步計時)
 ;----------------------------------------------------------------------------
 GT_GATE_FIGHTING_SKILL_THREAD() {
-    BnsDroidSkill_ProtectInFighting(ROLE_TYPE)
+    BnsDroidSkill_ProtectInFighting(BnsRoleType())
 }
 
 
@@ -232,7 +232,7 @@ BnsDroidMission_GT_KillFirstBoss() {
 
         BnsDroidSkill_commonPrepare()
 
-        BnsDroidSkill_ProtectBeforeFighting(ROLE_TYPE)
+        BnsDroidSkill_ProtectBeforeFighting(BnsRoleType())
 
         DumpLogD("●[Mission2] - GT_BOSS1_JUMP_PROTECT_TIMER =" GT_BOSS1_JUMP_PROTECT_TIMER)
         ;啟動非同步計時，時間到放技能
@@ -479,7 +479,7 @@ BnsDroidAction_GT_SearchFirstBossEntryPattern_UE3() {
 ;----------------------------------------------------------------------------
 GT_BOSS1_FIGHTING_SKILL_THREAD() {
     DumpLogD("BnsDroidSkill_ProtectInFighting thread start")
-    BnsDroidSkill_ProtectInFighting(ROLE_TYPE)
+    BnsDroidSkill_ProtectInFighting(BnsRoleType())
 }
 
 
@@ -604,7 +604,7 @@ BnsDroidMission_GT_KillFinalBoss() {
 ;    Mission3 - 使用技能(非同步計時)
 ;----------------------------------------------------------------------------
 GT_FINAL_FIGHTING_SKILL_THREAD() {
-    BnsDroidSkill_ProtectInFighting(ROLE_TYPE)
+    BnsDroidSkill_ProtectInFighting(BnsRoleType())
 }
 
 ;----------------------------------------------------------------------------

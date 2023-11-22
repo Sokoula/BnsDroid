@@ -28,9 +28,9 @@ Class BnsDroidAltarInfinite {
 
     FIGHTING_MODE := 0      ;0:specific, 1:all
     
-    FIGHTING_MEMBER := "1"    ;action member 
-    ; FIGHTING_MEMBER := "1,2,3,4"    ;action member 
-    ; FIGHTING_MEMBER := "1,2,3"    ;action member 
+    FIGHTING_MEMBERS := "1"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
 
 
     ;戰鬥成員狀態
@@ -41,7 +41,7 @@ Class BnsDroidAltarInfinite {
     isStageSpecialDone := 0    
 
     ;變身cd等待時間(狗之類)
-    hensin := 1
+    hensin := 0
 
 ;================================================================================================================
 ;█ Interface
@@ -442,7 +442,7 @@ Class BnsDroidAltarInfinite {
         this.actionPrefix()
         BnsStartAutoCombat()
 
-        dsleep(3000)
+        dsleep(35<00)
         send {q}
         dsleep(4000)
         send {q}

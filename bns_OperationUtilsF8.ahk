@@ -40,7 +40,7 @@ BnsOuF8Init() {
 
     ArrAerodromePreviews.push("empty" 1)                                        ;1, 
     ArrAerodromePreviews.push("empty" 1)                                        ;2,
-    ArrAerodromePreviews.push("pic_f8_dungeon_preview_ChaosSupplyChain1")        ;3, 
+    ArrAerodromePreviews.push("pic_f8_dungeon_preview_ChaosSupplyChain1")       ;3, 
 }
 
 ;================================================================================================================
@@ -106,42 +106,51 @@ BnsOuF8GobackLobby(confirm := 1) {
     loop, 5 {
         ;先接收任務獎勵
         ;Esc 叫系統選單
-        Send {Esc}
+        ControlSend,,{ESC}, %res_game_window_title%
         sleep 200
-        
-        if(FindPicList(WIN_THREE_QUARTERS_X, WIN_THREE_QUARTERS_Y, WIN_WIDTH, WIN_HEIGHT, 120, "res\pic_f8_menu_exit") == 1) {
-            exitX := findX + WIN_BLOCK_WIDTH * 0.3
-            exitY := findY + WIN_BLOCK_HEIGHT * 0.07
-            
+
+        ;if(FindPicList(WIN_THREE_QUARTERS_X, WIN_THREE_QUARTERS_Y, WIN_WIDTH, WIN_HEIGHT, 100, "res\pic_f8_menu_exit") == 1) {
+            ; exitX := findX + WIN_BLOCK_WIDTH * 0.3
+            ; exitY := findY + WIN_BLOCK_HEIGHT * 0.07
+
+        if(GetMemoryHack().getMenuStatus() == 1) {
+            exitX := 1770
+            exitY := 860
+
             MouseMove exitX, exitY
             sleep 200
 
-            click
-            sleep 200
+            ; MouseClick
+            ControlClick, x%exitX% y%exitY%, %res_game_window_title%,, Left     ;ControlClick 一定要在指定的位置才能做用, 滑鼠游標不會移動
+            sleep 500
 
-            Send y
-            sleep 2000
+            ControlSend,,{y}, %res_game_window_title%
+            sleep 1200
 
             if(FindPicList(WIN_CENTER_X, WIN_CENTER_Y, WIN_WIDTH, WIN_HEIGHT, 120, "res\pic_reward_button") == 1) {
                 
-                Send f
+                ControlSend,,{f}, %res_game_window_title%
+                sleep 500
+
+                ControlSend,,{f}, %res_game_window_title%
                 sleep 1000
 
-                Send f
-                sleep 200
+                ControlSend,,{f}, %res_game_window_title%
+                sleep 300
 
-                ;重新 Esc 叫系統選單
-                Send {Esc}
-                sleep 200
+                ; ;重新 Esc 叫系統選單
+                ; ControlSend,,{ESC}, %res_game_window_title%
+                ; sleep 300
 
-                MouseMove exitX, exitY
-                sleep 200
-                
-                click
-                sleep 600
-                
-                Send y
-                sleep 2000
+                ; MouseMove exitX, exitY
+                ; sleep 300
+
+                ; ; MouseClick
+                ; ControlClick, x%exitX% y%exitY%, %res_game_window_title%,, Left, 2     ;ControlClick 一定要在指定的位置才能做用, 滑鼠游標不會移動
+                ; sleep 1500
+
+                ; ControlSend,,{f}, %res_game_window_title%
+                ; sleep 300
             }
             
             if(BnsIsMapLoading() == 1) {

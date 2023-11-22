@@ -120,7 +120,7 @@ BnsDroidMission_ST_ClearLittleBossCorridor() {
     }
 
     ;開抵抗
-    BnsDroidSkill_ProtectBeforeFighting(ROLE_TYPE)
+    BnsDroidSkill_ProtectBeforeFighting(BnsRoleType())
     
     ;原地等待雜魚集中
     sleep 10000

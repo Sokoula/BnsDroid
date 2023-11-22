@@ -28,10 +28,10 @@ Class BnsDroidChaosBlackShenmu {
     ; FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
     FIGHTING_MODE := 1    ;0:alone, 1:specific, 2:all
     
-    ; FIGHTING_MEMBER := "1"    ;action member
-    FIGHTING_MEMBER := "1,2"    ;action member     
-    ; FIGHTING_MEMBER := "1,2,3"    ;action member 
-    ; FIGHTING_MEMBER := "1,2,3,4"    ;action member 
+    ; FIGHTING_MEMBERS := "1"    ;action member
+    FIGHTING_MEMBERS := "1,2"    ;action member
+    ; FIGHTING_MEMBERS := "1,2,3"    ;action member 
+    ; FIGHTING_MEMBERS := "1,2,3,4"    ;action member 
 
 
     ;戰鬥成員狀態(array)
@@ -70,7 +70,7 @@ Class BnsDroidChaosBlackShenmu {
     start() {
         this.isStageSpecialDone := 0    ;重置特殊機制 flag
 
-        FIGHTING_MEMBER := (FIGHTING_MEMBER == "") ? "1" : FIGHTING_MEMBER
+        FIGHTING_MEMBERS := (FIGHTING_MEMBERS == "") ? "1" : FIGHTING_MEMBERS
 
         switch this.FIGHTING_MODE
         {
@@ -118,7 +118,7 @@ Class BnsDroidChaosBlackShenmu {
         
         ; ShowTipI("●[Mission1] - take dragon pulse")
         ; fn := func("BnsDroidChaosBlackShenmu.takeDragonPulse").bind(BnsDroidChaosBlackShenmu, 1)    
-        ; BnsPcTeamMemberAction(fn,StrSplit(FIGHTING_MEMBER,","))    ;全員搭龍脈
+        ; BnsPcTeamMemberAction(fn,StrSplit(FIGHTING_MEMBERS,","))    ;全員搭龍脈
         this.navigateToBoss1()
 
         
@@ -207,8 +207,8 @@ Class BnsDroidChaosBlackShenmu {
         ; 小王房集合
         ; ShowTipI("●[Action] - take dragon pulse to Boss1")
         ; fn := func("BnsDroidChaosBlackShenmu.navigateToBoss1").bind(BnsDroidChaosBlackShenmu, 1)
-        ; ; BnsPcTeamMemberAction(fn, StrSplit(this.FIGHTING_MEMBER, ","),,, 2000)    ;action, mids, feedback, backlead, delay
-        ; BnsPcTeamMemberAction(fn, StrSplit(this.FIGHTING_MEMBER, ","))    ;action, mids, feedback, backlead, delay
+        ; ; BnsPcTeamMemberAction(fn, StrSplit(FIGHTING_MEMBERS, ","),,, 2000)    ;action, mids, feedback, backlead, delay
+        ; BnsPcTeamMemberAction(fn, StrSplit(FIGHTING_MEMBERS, ","))    ;action, mids, feedback, backlead, delay
 
 
         ;對戰一王
@@ -219,14 +219,14 @@ Class BnsDroidChaosBlackShenmu {
         ;移動到尾王
         ; fn := func(this.navigateToFinalBoss.name)
         fn := func(this.navigateToFinalBoss.name).bind(this)
-        BnsPcTeamMemberAction(fn, StrSplit(this.FIGHTING_MEMBER, ","))    ;戰鬥人員全員移動到尾王
+        BnsPcTeamMemberAction(fn, StrSplit(FIGHTING_MEMBERS, ","))    ;戰鬥人員全員移動到尾王
         ; sleep 6000
         sleep 4000
 
 
         ;對戰尾王
         loop {
-            ret := this.runStageFightFinalBoss(this.FIGHTING_MEMBER)
+            ret := this.runStageFightFinalBoss(FIGHTING_MEMBERS)
             
             if(ret == 0) {    ;timeout or  BOSS not found
                 return 0
@@ -235,7 +235,7 @@ Class BnsDroidChaosBlackShenmu {
                 ShowTipI("●[Exception] - all fighter are gone, resurrection and try again")
                 
                 ; sleep 15000 ;等確定死透(4鍵亮起可按)
-                this.backToFightFinalBoss(this.FIGHTING_MEMBER)
+                this.backToFightFinalBoss(FIGHTING_MEMBERS)
             }
             else if(ret >= 1) {    ;success
                 break
@@ -578,14 +578,14 @@ Class BnsDroidChaosBlackShenmu {
 
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 第一階段: 對戰一王
+    ;■ 第三階段: 對戰一王
     ;* @return - 1: success; 0: failed
     ;------------------------------------------------------------------------------------------------------------
     runStageFightBoss1(members := "1") {
 
         ShowTipI("●[Mission3] - start to fight")
 
-        ; this.startTeamAutoCombat(this.FIGHTING_MEMBER)
+        ; this.startTeamAutoCombat(FIGHTING_MEMBERS)
         ; sleep 1000
 
         ; ;進入戰鬥
@@ -631,7 +631,7 @@ Class BnsDroidChaosBlackShenmu {
 
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 第三階段: 對戰尾王
+    ;■ 第四階段: 對戰尾王
     ;* @return - 1: success; 0: failed
     ;------------------------------------------------------------------------------------------------------------
     runStageFightFinalBoss(members := "1") {
@@ -645,7 +645,7 @@ Class BnsDroidChaosBlackShenmu {
         fnSSHandler := (this.SPECIAL_STAGE_HANDLE) ? func(this.isSpecialStageDetected.name).bind(BnsDroidChaosBlackShenmu) : 0
 
         ;補充動作計時器
-        ; fnAdditional := func("BnsPcTeamMemberAction").bind(func(this.actionAdditional.name).bind(this), StrSplit(this.FIGHTING_MEMBER, ","),1)    ;mid 引數
+        ; fnAdditional := func("BnsPcTeamMemberAction").bind(func(this.actionAdditional.name).bind(this), StrSplit(FIGHTING_MEMBERS, ","),1)    ;mid 引數
         fnAdditional := func(this.actionAdditional.name).bind(this)
 
         ;戰鬥條件脫離
@@ -677,7 +677,7 @@ Class BnsDroidChaosBlackShenmu {
                 ;預留撿箱時間
                 
                 ; BnsIsLeaveBattle(3000)    ;等待脫戰
-                ; this.stopTeamAutoCombat(this.FIGHTING_MEMBER)
+                ; this.stopTeamAutoCombat(FIGHTING_MEMBERS)
                 ShowTipI("●[Mission4] - completed, ret:" fight)
 
                 ret := 1
@@ -716,7 +716,7 @@ Class BnsDroidChaosBlackShenmu {
         fn := func(this.pickReward.name).bind(this)
 
         ;戰鬥組員
-        BnsPcTeamMemberAction(fn, StrSplit(this.FIGHTING_MEMBER, ","), 1, 0)  ; 回傳執行mId, 不切回 leader 
+        BnsPcTeamMemberAction(fn, StrSplit(FIGHTING_MEMBERS, ","), 1, 0)  ; 回傳執行mId, 不切回 leader 
 
         ; ;掛件組員
         ; BnsPcTeamMemberAction(fn,StrSplit("4", ","), 1, 0)  ; 回傳執行mId, 不切回 leader
@@ -871,7 +871,7 @@ Class BnsDroidChaosBlackShenmu {
     pickReward(mId := "") {
         DumpLogD("●[Action] - " A_ThisFunc)
 
-        if(inStr(this.FIGHTING_MEMBER, mId) != 0) {    ;戰鬥成員
+        if(inStr(FIGHTING_MEMBERS, mId) != 0) {    ;戰鬥成員
             if(BnsIsCharacterDead() == 1) {    ;角色死亡
                 ShowTipI("●[Action] - pickReward " mId " is dead, do resurrection and go back to pick reward")
                 this.resurrection()
@@ -995,7 +995,7 @@ Class BnsDroidChaosBlackShenmu {
     actionAdditional(mid := 0) {
         DumpLogD("●[Action] - " A_ThisFunc ", mid:" mid)
 
-        fighters := StrSplit(this.FIGHTING_MEMBER, ",")
+        fighters := StrSplit(FIGHTING_MEMBERS, ",")
 
         For i, f in fighters
         {
@@ -1044,9 +1044,9 @@ Class BnsDroidChaosBlackShenmu {
     judgeVine() {
         ret := 0
         sx := WIN_CENTER_X - WIN_BLOCK_WIDTH
-        sy := WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 4
+        sy := WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 6
         ex := WIN_CENTER_X + WIN_BLOCK_WIDTH
-        ey := WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 1.5
+        ey := WIN_CENTER_Y - WIN_BLOCK_HEIGHT * 2
         
         BnsActionWalkToPosition(-5790, 6150)  ;祭壇西側觀察點
 
@@ -1109,7 +1109,7 @@ Class BnsDroidChaosBlackShenmu {
         bossY := GetMemoryHack().getMainBossPosY()
 
 
-        fighters := StrSplit(this.FIGHTING_MEMBER, ",")
+        fighters := StrSplit(FIGHTING_MEMBERS, ",")
         deadCount := 0
         leaderDid := 0
 
