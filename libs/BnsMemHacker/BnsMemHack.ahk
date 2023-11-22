@@ -102,7 +102,7 @@ Class BnsMemHack {
     ;Check memhack is worked; [ return ] 0:expired; 1:worked
     isMemHackWork() {
         if(this.getPosY() == "") {
-            ; DumpLogE("[ERROR] Memory Hack not work, please check base address")
+            ;DumpLogE("[ERROR] Memory Hack not work, please check base address")
             return 0
         }
 
@@ -115,9 +115,9 @@ Class BnsMemHack {
         
         camInfo := "CAM-XYZ:[" this.getCamAzimuth() "(" this.getCamAzimuthH() "), " this.getCamAltitude() "]"
 
-        targetName := "Name: " this.getMainTargetName()
-        targetBlood := "HP: " this.getMainTargetBlood()
-        targetPos := "M-BOSS-POS-XYZ:[" this.getMainBossPosX() ", " this.getMainBossPosY() ", " this.getMainBossPosZ() "]"
+        targetName := "TarGet Name: " this.getMainTargetName()
+        targetBlood := "Target HP: " this.getMainTargetBlood()
+        targetPos := "M-Target-POS-XYZ:[" this.getMainBossPosX() ", " this.getMainBossPosY() ", " this.getMainBossPosZ() "]"
 
         switch type
         {

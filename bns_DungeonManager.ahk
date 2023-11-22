@@ -23,6 +23,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #include bns_Droid_ChaosSupplyChain.ahk             ;混沌補給基地
 #include bns_Droid_AltarOfTheInfinite.ahk           ;崑崙派本山
 #include bns_Droid_ChaosBlackShenmu.ahk             ;混沌黑神木
+#include bns_Droid_ChimeraLab.ahk                   ;黑龍教異變研究所
 #include bns_Droid_ShroudedAjanara.ahk              ;千手羅漢陣
 #include bns_Droid_GiantsHart.ahk                   ;巨神之心
 
@@ -89,6 +90,15 @@ Class BnsDungeonManager {
             case 206:
                 ret:=this.runnableChaosBlackShenmu()
             
+            case 207:
+                ret:=this.runnableChimeraLab()
+
+            case 208:
+                ;TBD
+            
+            case 209:
+                ;TBD
+
             case 301:
                 ret:=this.runnableShroudedAjanara()
 
@@ -109,6 +119,7 @@ Class BnsDungeonManager {
         ShowTipI("●[System] - Select Hero Dungeon" tag "...")
         DumpLogD("[BnsGoDungeon_HeroLoader] tag:'" tag "', index:" index ", scroll:" scroll)
 
+        MouseClick left     ;切完桌面點一下, 防止後續操作失效
 
         if(mode < 1 || mode > 3) {
             ShowTipE("●[Exception] Illegal party mode " mode ", unknown mode.")
@@ -116,12 +127,14 @@ Class BnsDungeonManager {
         }
 
         ;1: 英雄, 2:封魔
-        BnsOuF8SelectPartyType(1)
-        sleep 3500
+        if(BnsOuF8SelectPartyType(1) > 1) {
+            sleep 3500
+        }
 
         ;1: 入門, 2:一般, 3:熟練
-        BnsF8SelectPartyMode(mode)
-        sleep 3500
+        if(BnsF8SelectPartyMode(mode) > 1) {
+            sleep 3500
+        }
 
         if(mode == 1) {
             index := index + ACTIVITY
@@ -438,6 +451,29 @@ Class BnsDungeonManager {
     }
 
 
+;================================================================================================================
+;    ■ 207 - ChaosBlackShenmu - 黑龍教異變研究所(F8)
+;================================================================================================================
+    runnableChimeraLab() {
+
+    }
+
+
+
+
+;================================================================================================================
+;    ■ 208 - ChaosBlackShenmu - 黑龍教降臨殿(F8)
+;================================================================================================================
+    ;TBD
+
+
+
+
+;================================================================================================================
+;    ■ 209 - ChaosBlackShenmu - 混沌黑神木(F8)
+;================================================================================================================
+    ;TBD
+
 
 ;================================================================================================================
 ;    ■ 301 - ShroudedAjanara - 千手羅漢陣(地表)
@@ -445,14 +481,37 @@ Class BnsDungeonManager {
     runnableShroudedAjanara() {
         ret := 0
 
-        droid := new BnsDroidShroudedAjanara()
-        droid.dungeonNavigation()
-        
-        ret := droid.start()    ;開始執行攻略腳本
-
-        if(ret != 0) {
-            droid.finish()        ;腳本收尾
+        if(BnsCcIsProfileLoaded() == 0) {
+            BnsCcLoadCharProfiles(BnsDroidShroudedAjanara.getCharacterProfiles())    ;載入Character Profiles
         }
+
+        if (BnsCcIsProfilesValid()) {
+            if(!BnsCcIsProfilesEOF()) {
+                BnsGoCharacterHall()
+                BnsCcChangeCharacter(BnsCcGetProfile(0))    ;切換角色, 0:取得當前 profile
+            }
+            else {
+                ;所有角色跑完了, 停止TASK任務
+                return 0
+            }
+        }
+
+        round := BnsCcGetMissionTimes()
+
+        loop %round% {
+
+            droid := new BnsDroidShroudedAjanara()
+            droid.dungeonNavigation()
+            
+            ret := droid.start()    ;開始執行攻略腳本
+
+            if(ret != 0) {
+                droid.finish()        ;腳本收尾
+            }
+        }
+
+
+        BnsCcProfileNext()    ;切換到下一個 profile
 
         return ret
     }

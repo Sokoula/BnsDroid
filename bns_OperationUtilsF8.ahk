@@ -209,14 +209,14 @@ BnsOuF8EnterRoomAndReady(number) {
     }
 
     ;Tap Ready Button
-    BnsOuF8TapStartButton()
-    sleep 1000
+    ; BnsOuF8TapStartButton()
+    ; sleep 1000
 
     loop, 5 {
-        btnText := GetTextOCR(WIN_CENTER_X - WIN_BLOCK_WIDTH, WIN_HEIGHT - WIN_BLOCK_HEIGHT, WIN_BLOCK_WIDTH * 2, WIN_BLOCK_HEIGHT, res_game_window_title)
+        btnText := GetTextOCR(WIN_CENTER_X - WIN_BLOCK_WIDTH, WIN_HEIGHT - WIN_BLOCK_HEIGHT, WIN_BLOCK_WIDTH * 2, floor(WIN_BLOCK_HEIGHT * 2 / 3), res_game_window_title)
         DumpLogD("[BnsOuF8EnterRoomAndReady] button text:" btnText)
 
-        if(btnText == res_lobby_btn_member_cancel) {
+        if (RegExMatch(btnText, res_lobby_btn_member_cancel) != 0) {
             DumpLogD("[BnsOuF8EnterRoomAndReady] prepare ready!!")
             return 1
         }
@@ -224,7 +224,7 @@ BnsOuF8EnterRoomAndReady(number) {
             DumpLogD("[BnsOuF8EnterRoomAndReady] retry " A_index " tap ready button")
             BnsOuF8TapStartButton()
         }
-        sleep 1000
+        sleep 2000
     }
 
     DumpLogE("[BnsOuF8EnterRoomAndReady] Error! failed to prepare ready")
@@ -268,6 +268,7 @@ BnsOuF8TapStartButton() {
 ;================================================================================================================
 BnsOuF8SelectPartyType(t) {
     regions := StrSplit(PARTY_FORM_HEADER_TAB_REGION, ",", "`r`n")
+    ret := 0
     
     ;PARTY_FORM_HEADER_TAB_REGION
     ;[    副本    |    戰場    ]
@@ -275,26 +276,23 @@ BnsOuF8SelectPartyType(t) {
 
     unitW := regions[3] / 4        ;[     |英雄|封魔|     ]
     unitH := regions[4] / 2
-    
-    
-    
+
+
     mX := regions[1] + (unitW * (t + 0.5))
     mY := regions[2] + (unitH * 1.5)
 
 
     loop {
-        MouseClick, Left, mX, mY
-        sleep 2000
-
         if (t == 1) {    ;英雄副本
             str := GetTextOCR(regions[1], regions[2] + floor(unitH * 2), floor(unitW), floor(unitH), res_game_window_title)
             if(DBUG > 1) {
                 DumpLogD("[BnsOuF8SelectPartyType] str:" str ", t:" t ", pattern:" res_lobby_labal_party_setting)
             }
 
-            if (RegExMatch(str, res_lobby_labal_party_setting) != 0) {
+            if (RegExMatch(str, res_lobby_labal_party_setting) != 0) {  ;隊伍設定
                 DumpLogD("[BnsOuF8SelectPartyType] type:" t " select success")
-                return 1
+                ret := A_index
+                break
             }
         }
 
@@ -304,15 +302,19 @@ BnsOuF8SelectPartyType(t) {
                 DumpLogD("[BnsOuF8SelectPartyType] str:" str ", t:" t ", pattern:" res_lobby_labal_level_select)
             }
 
-            if (RegExMatch(str, res_lobby_labal_level_select) != 0) {
+            if (RegExMatch(str, res_lobby_labal_level_select) != 0) {   ;段位選擇
                 DumpLogD("[BnsOuF8SelectPartyType] type:" t " select success")
-                return 1
+                ret := A_index
+                break
             }
         }
+
+        MouseClick, Left, mX, mY
+        sleep 2000
     }
 
     DumpLogD("[BnsOuF8SelectPartyType] type:" t " select failed")
-    return
+    return ret
 }
 
 
@@ -321,6 +323,7 @@ BnsF8SelectPartyMode(m) {
     ;[     副本      |      戰場     ]
     ;[        英雄   |   封魔        ]
     regions := StrSplit(PARTY_FORM_HEADER_TAB_REGION, ",", "`r`n")
+    ret := 0
 
     unitW := regions[3] / 3         ;[入門|一般|熟鍊]
     unitH := regions[4] / 2
@@ -330,17 +333,19 @@ BnsF8SelectPartyMode(m) {
 
 
     loop, 3 {
-        MouseClick, Left, mX, mY
-        sleep 2000
-
         if(FindPixelRGB(mX, mY + unitH * 0.3, mX + unitW // 2, mY + unitH * 0.5, 0x2E5E86, 0x18) == 1) {
             DumpLogD("[BnsF8SelectPartyMode] mode:" m " select success")
-            return 1
+            ret := A_index
+            break
         }
+
+        MouseClick, Left, mX, mY
+        sleep 2000
     }
-    
+
+
     DumpLogD("[BnsF8SelectPartyMode] mode:" m " select failed")
-    return 0
+    return ret
 }
 
 
@@ -432,7 +437,7 @@ BnsOuF8SelectHeroDungeon(index, scroll := 0) {
     ;0.77 = (0.71 + 0.83 ) / 2 -- 30 ~ 35 間取平均卡片高度
 
     MouseMoveA(mX, mY)
-    
+
     ;將副本表拉到最頂以歸0校準
     ; MouseWheel(1, 20)
     ; sleep 200
@@ -523,13 +528,19 @@ BnsOuF8SelectDemonsbaneDungeon(level, index, scroll) {
     my := regions[2] + floor(unitH * 11.64 + (itemH * ((index - 1) + 0.5)))
     MouseMove mx, my
     
+    ;選擇副本(座標定位)
+    MouseClick, left, mx, my
+    sleep 1000
+
+
     ;將副本表拉到最頂以歸0校準
     MouseWheel(1, 20)
     sleep 1000
 
-    MouseWheel(-1, scroll)
+    ; MouseWheel(-1, scroll)
+    MouseWheel(-1, scroll * 10)
     sleep 200
-    
+
     ;選擇副本(座標定位)
     MouseClick, left, mx, my
     sleep 1000
@@ -628,12 +639,64 @@ BnsOuF8LobbyWaitingReadyPic() {
 ;================================================================================================================
 ;    ACTION - 
 ;================================================================================================================
-;F8 square navigation; [ cate ] 1:hero, 2:demonsbane;  [ confirm ] 1: block until map load done; 0: none-block
-BnsOuF8DefaultGoInDungeon(cate, confirm := 1) {
-    sleep 1000
+;F8 square navigation; [ cate ] 1:英雄; 2:封魔(demonsbane);  [ accept ] 0:不接任務; 1:接任務;  [ confirm ] 0:不等待過圖完畢立即返回; 1:等待過圖完畢反回
+BnsOuF8DefaultGoInDungeon(cate, accept := 0, confirm := 1) {
+    if(GetMemoryHack().isMemHackWork() == 1) {
 
-    ShowTipI("●[System] - Move from square into dungeon")
+        switch cate {
+            case 1:    ;Hero
+                px1 := 77632, py1 := 658
+                px2 := 77770, py2 := 815
+                px3 := 78030, py3 := 1200
     
+            case 2:    ;Demonsbane
+                px1 := 77575, py1 := 685
+                px2 := 78025, py2 := 980
+                px3 := 78025, py3 := 2250
+        }
+
+        if(accept ==1 || MISSION_ACCEPT == 1) { ;accept 有值就強制蓋掉 MISSION_ACCEPT 的設置
+
+            BnsActionSprintToPosition(px1, py1)
+            ; BnsActionAdjustDirection(90)
+            sleep 500
+
+            Send {f}
+            loop ,2 {
+                sleep 1000
+                Send {f} {f}
+            }
+            Send {Esc}
+            sleep 100
+
+            BnsActionSprintToPosition(px2, py2)
+        }
+
+
+        BnsActionSprintToPosition(px3, py3)
+
+        if(confirm == 1) {
+            sleep 3000
+    
+            ;等待廣場進副本讀圖完畢
+            if(BnsWaitMapLoadDone() == 0) {
+                BnsOuF8GobackLobby()
+                return 0
+            }
+        }
+    
+        return 1
+    }
+    else {
+        return BnsOuF8DefaultGoInDungeonLegacy(cate, accept, confirm)
+    }
+}
+
+
+BnsOuF8DefaultGoInDungeonLegacy(cate, accept := 0, confirm := 1) {
+    sleep 1000
+    ShowTipI("●[System] - Move from square into dungeon")
+
     switch cate
     {
         case 1:    ;Hero
@@ -653,8 +716,8 @@ BnsOuF8DefaultGoInDungeon(cate, confirm := 1) {
         duration2 := duration2 * 0.92
         duration3 := duration3 * 0.92
     }
-    
-    if(MISSION_ACCEPT == 1) {
+
+    if(accept ==1 || MISSION_ACCEPT == 1) { ;accept 有值就強制蓋掉 MISSION_ACCEPT 的設置
 
         ;先與NPC對話接任務, 再進入副本
         Send {w Down} {a Down}

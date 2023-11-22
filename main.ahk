@@ -30,16 +30,26 @@ global ACTIVITY:=1         ;當前活動副本(入門才會有)
 global PARTY_MODE:=2       ;組隊模式: 1:入門, 2:一般, 3:困難
 
 
-;-------------------------
-; 001 - 天之盆地鑰匙        - 地表
-; 101 - 鬼怪村活動          - 地表
-; 102 - 紅絲倉庫            - 地表
-; 103 - 可疑的空島          - F8
-; 104 - 巨神之心            - F8
-; 201 - 鬼面劇團            - 地表
-; 202 - 沙暴神殿            - f8
-; 203 - 青空船              - f8
-; 204 - 混沌補給基地        - f8
+;--- Dungeon Selector(副本選擇) ------------------------------------------
+; 001 - 天之盆地鑰匙      - 地表
+; 101 - 鬼怪村活動        - 地表
+; 102 - 紅絲倉庫          - 地表
+; 103 - 可疑的空島        - F8
+; 201 - 鬼面劇團          - 地表
+; 202 - 沙暴神殿          - 地表  (x)
+; 203 - 青空船            - 地表  (x)
+; 204 - 混沌補給基地      - f8
+; 205 - 崑崙派本山        - f8
+; 206 - 混沌黑神木        - f8
+; 207 - 黑龍教異變研究歐  - f8
+; 208 - 黑龍教降臨殿      - f8
+; 209 - 黑龍教降臨殿      - f8
+; 301 - 千手羅漢陣        - 地表
+; 302 - 巨神之心          - F8
+; DUNGEON_INDEX = 204
+; DUNGEON_INDEX = 301
+; DUNGEON_INDEX = 206
+; DUNGEON_INDEX = 205
 global DUNGEON_INDEX:=102           ;最後會被 config.ini 複蓋
 
 
@@ -136,25 +146,37 @@ singleStepTest() {
 
     if(testMode == 1)
     {
-        droid := new BnsDroidChaosBlackShenmu()
+        ; DBUG := 1
 
+        ; droid := new BnsDroidAltarInfinite()
+        ; droid.runStageFightFinalBoss()
+
+        ; droid := new BnsDroidChaosBlackShenmu()
         ; droid.circledAroundAltar(-360,1)
         ; droid.runStageClearAltar()
+        ; droid.judgeVine()
         ; droid.navigateToFinalBoss()
-
         ; ShowTipI("find way:" droid.judgeVine())
 
-
-        ; sleep 3000
-
+        ; BnsActionSprintToPosition(3700, -2500)
         ; return 1
+
+        ; droid := new BnsDroidChimeraLab()
+        ; droid.runStageClearGate()
+
+        ; ShowTip(BnsIsEnemyDetected())
+        ; sleep 5000
         
+        return 1
 
+        ; BnsActionAdjustDirection(90)
 
-        BnsActionAdjustDirection(90)
 
         loop {
             memHack := GetMemoryHack()
+            ShowTip(memHack.infoDump(1) "`n HP: " memHack.getHpValue() "`nPosture: " memHack.getPosture() "`ntalk:" memHack.isAvailableTalk() "`nBoss:" memHack.getMainTargetBlood() )
+
+            ; ShowTip("distance: " BnsMeansureTargetDistDegree(-5376, 6239)[1])
             ; ShowTipD("isAutoCombat: " memHack.getAutoCombatState())
             ; ShowTip(memHack.infoDump(1))
             ; ShowTipD(memHack.infoDump(2))
@@ -163,7 +185,7 @@ singleStepTest() {
             ; ShowTipD("Posture: " memHack.getPosture())
             ; ShowTipD("isBattle: " memHack.isInBattling() ", isLeaveBattle: " BnsIsLeaveBattle())
             ; ShowTipD("Target: " memHack.getMainTargetName())
-            ShowTipD("isDead: " BnsIsCharacterDead() ", posture: " GetMemoryHack().getPosture())
+            ; ShowTipD("isDead: " BnsIsCharacterDead() ", posture: " GetMemoryHack().getPosture())
             ; ShowTipD("HP: " memHack.getHpValue())
             ; ShowTipD("Speed " memHack.getSpeed())
             ; ShowTipD("room:" memHack.getF8RoomNumber())
@@ -188,6 +210,7 @@ singleStepTest() {
         ; return 1
 
 ;=================================== 找基址一個一個點
+       
         ; loop {
         ;     send {down}
         ;     sleep 30
@@ -324,6 +347,11 @@ SetBatchLines, -1                   ;腳本多久讓出 CPU 時間, 可設為 ms
 ;Start Key
 ;^F1::
 
+;以管理者權限執行
+if(!A_IsAdmin) {
+    Run *RunAs "%A_ScriptFullPath%"  ; Requires v1.0.92.01+
+    ExitApp
+ }
 
 
 

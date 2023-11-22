@@ -178,7 +178,7 @@ BnsPcTeamMembersSquareNavigation(cate, onlyLastConfirm := 1) {  ;cate(1英雄/2�
         confirm := (onlyLastConfirm) ? ((A_index == members) ? 1 : 0) : 1
 
         ;進入副本
-        if(BnsOuF8DefaultGoInDungeon(cate, confirm) == 1) {        
+        if(BnsOuF8DefaultGoInDungeon(cate,, confirm) == 1) {        
             ret++
         }
 

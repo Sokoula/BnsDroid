@@ -176,7 +176,7 @@ FindPixelRGB(x0, y0, x1, y1, colorHex, s) {
     global findX := getX
     global findY := getY
 
-    if(DBUG == 1) {
+    if(DBUG >= 1) {
         ShowTipD("[FindPixelRGB] err: " ErrorLevel "  color:" colorHex ", s:" s ",  getX:" getX ",  getY:" getY)
 
         ; Send {Alt down}
@@ -203,8 +203,8 @@ FindPixelRGB(x0, y0, x1, y1, colorHex, s) {
 ;----------------------------------------------------------------------------------------------------------------
 ;    PixelGetColor (以前景畫面定點取色)
 ;----------------------------------------------------------------------------------------------------------------
-GetPixelColor(sX, sY) {
-    PixelGetColor, pixelColor, sX, sY, RGB
+GetPixelColor(x, y) {
+    PixelGetColor, pixelColor, x, y, RGB
     return pixelColor
 }
 

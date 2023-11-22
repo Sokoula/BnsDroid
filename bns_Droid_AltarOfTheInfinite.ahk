@@ -40,7 +40,8 @@ Class BnsDroidAltarInfinite {
     ;是否完成特殊機制, 只在 SPECIAL_STAGE_HANDLE = 1 作用
     isStageSpecialDone := 0    
 
-
+    ;變身cd等待時間(狗之類)
+    hensin := 1
 
 ;================================================================================================================
 ;█ Interface
@@ -214,6 +215,8 @@ Class BnsDroidAltarInfinite {
 
         BnsActionSprintToPosition(-4490, 116)   ;香爐前
         BnsActionAdjustDirection(159)
+        
+        sleep 6000  ;狗拳使用
 
         sleep 500
         send {f}
@@ -251,20 +254,36 @@ Class BnsDroidAltarInfinite {
 
         BnsActionWalkToPosition(-3160, 4040, 0x04)          ;第二閘門區第一開戰點
         BnsStartAutoCombat()
-        BnsIsEnemyClear(1500, 30)
+        BnsIsEnemyClear(1500, 60)
         BnsStopAutoCombat()
         sleep 1000
 
         BnsActionWalkToPosition(-3190, 5120,,5000)         ;第二閘門區第二開戰點
         BnsStartAutoCombat()
-        BnsIsEnemyClear(1500, 30)
+        BnsIsEnemyClear(1500, 60)
         BnsStopAutoCombat()
         sleep 1000
 
-        BnsActionWalkToPosition(-3177, 9010,,5000)          ;第二閘門區門守戰點
+        BnsActionWalkToPosition(-3190, 5120,,5000)         ;第二閘門區第二開戰點,再一次
         BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 30)
+        BnsIsEnemyClear(1500, 60)
         BnsStopAutoCombat()
+        sleep 1000
+
+        BnsActionWalkToPosition(-3177, 9010,,5000)          ;第二閘門區門守開戰點
+        sleep 100
+
+        if(BnsIsEnemyDetected() > 0) {
+            BnsStartAutoCombat()
+            BnsIsEnemyClear(1000, 60)
+            BnsStopAutoCombat()
+        }
+        else {
+            ShowTipI("●[Mission2] - failed, gate keeper not found")
+            sleep 60000
+            return 0
+        }
+
         sleep 1000
 
         if(BnsIsCharacterDead() == 1) {
@@ -290,6 +309,11 @@ Class BnsDroidAltarInfinite {
 
         BnsStartHackSpeed()
         BnsActionWalkToPosition(-4147, 12440,,10000)     ;第二香爐
+        
+        if(this.hensin) {
+            sleep 40000 ;狗狗變身
+        }
+
         sleep 500
         send {f}
         sleep 3000
@@ -308,19 +332,25 @@ Class BnsDroidAltarInfinite {
         
         ShowTipI("●[Mission3] - Fighting...")
         BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 600)
+        BnsIsEnemyClear(1000, 60, func(this.actionEscape.name).bind(this, 0))
         BnsStopAutoCombat()
-        BnsActionSprintToPosition(-6359, 11390,,10000)     ;第二香爐守門怪開戰點
+        
         BnsStartAutoCombat()
-        if(BnsIsEnemyClear(1000, 600) != 1) {
+        BnsIsEnemyClear(1000, 30)
+        BnsStopAutoCombat()
+
+        BnsActionSprintToPosition(-6359, 11390,,10000)     ;第二香爐守門怪開戰點
+        
+        BnsStartAutoCombat()
+        if(BnsIsEnemyClear(1000, 30) != 1) {
+            BnsStopAutoCombat()
             return 0
         }
 
         BnsStopAutoCombat()
-
         BnsStopHackSpeed()
         
-        ShowTipI("●[Mission2] - Completed")
+        ShowTipI("●[Mission3] - Completed")
         return 1
     }
 
@@ -336,10 +366,16 @@ Class BnsDroidAltarInfinite {
         BnsActionWalkToPosition(-9740, 11830)     ;左引戰點
         ; sleep 3000      ;等待聚怪
         BnsStartAutoCombat()
-        BnsIsEnemyClear(1000, 600)
+        BnsIsEnemyClear(1000, 600,, func(this.actionEscape.name).bind(this, 1))
         BnsStopAutoCombat()
         
         BnsActionWalkToPosition(-9750, 10890)    ;右引戰點
+        ;sleep 3000      ;等待聚怪
+        BnsStartAutoCombat()
+        BnsIsEnemyClear(1000, 600)
+        BnsStopAutoCombat()
+
+        BnsActionWalkToPosition(-9750, 10890)    ;右引戰點2W
         ;sleep 3000      ;等待聚怪
         BnsStartAutoCombat()
         BnsIsEnemyClear(1000, 600)
@@ -398,15 +434,19 @@ Class BnsDroidAltarInfinite {
         BnsActionWalkToPosition(-12246, 5148, 0x04)     ;一王開戰點
         BnsActionAdjustDirection(295)
 
+        if(this.hensin) {
+            sleep 60000 ;等狗狗變身;懶人處理法
+        }
+
         ShowTipI("●[Mission5] - Fighting...")
         this.actionPrefix()
         BnsStartAutoCombat()
-        
-        sleep 3000
+
+        dsleep(3000)
         send {q}
-        sleep 4000
+        dsleep(4000)
         send {q}
-        sleep 3000
+        dsleep(4000)
         send {q}
 
         BnsIsEnemyClear(3000, 600)
@@ -437,12 +477,42 @@ Class BnsDroidAltarInfinite {
         BnsActionWalkToPosition(-18765, -10182)     ;移動到尾王
         sleep 1000
 
+        DBUG := 1
+
         ShowTipI("●[Mission6] - Fighting...")
+        this.actionPrefix()
         BnsStartAutoCombat()
-        BnsIsEnemyClear(3000, 600)
+        sleep 2000
+        BnsIsEnemyClear(3000, 600,, func(this.actionEscape.name).bind(this, 2))    ;脫戰逃逸
+        sleep 3000
+
+        loop {
+            if(this.actionEscape(2) == 1) {
+                ShowTipI("●[Mission6] - disengage")
+                break
+            }
+
+            sleep 1000
+        }
+
         BnsStopAutoCombat()
         BnsStopHackSpeed()
         ShowTipI("●[Mission6] - Completed")
+
+        
+        if(this.isBidding() == 1) {
+            ShowTipI("●[Action] - Bidding begin")
+            loop {
+                if(this.isBidding() != 1) {
+                    break
+                }
+
+                ShowTipI("●[Action] - Bidding item: " A_index)
+                this.teamBidding()
+            }
+        }
+
+        DBUG := 0
 
         return 1
     }
@@ -564,21 +634,61 @@ Class BnsDroidAltarInfinite {
         sleep 100
 
         ;使用狗盾
-        send {1}
-        sleep 500
-        send {f}
+        ; send {1}
+        ; sleep 500
+        ; send {f}
+
+        ;使用狗
+        send {tab}
+        sleep 300
+        send {v}
+
     }
 
 
 
     ;------------------------------------------------------------------------------------------------------------
-    ;■ 補充動作
+    ;■ 戰鬥逃逸
     ;* @return - none
     ;------------------------------------------------------------------------------------------------------------
-    actionAdditional(mid := 0) {
-        DumpLogD("●[Action] - " A_ThisFunc ", mid:" mid)
+    actionEscape(arg := 0, mid := 0) {
+        ; DumpLogD("●[Action] - " A_ThisFunc ", mid:" mid)
+
+
+        switch arg
+        {
+            case 0:         ;回避木頭人誘餌
+                if(BnsGetPosY() > 12200) {
+                    DumpLogD("●[Action] - " A_ThisFunc ", avoid the dummy bait, mid:" mid)
+                    BnsActionWalkToPosition(-3300, 11600)
+                    return 0
+                }
+
+            case 1:         ;防卡柱子移位
+                if(BnsGetPosX() < -10500) {
+                    DumpLogD("●[Action] - " A_ThisFunc ", avoid floor block, mid:" mid)
+                    BnsActionWalkToPosition(-10550, 12200)
+                    return 0
+                }
+
+            case 2:         ;尾王結束戰鬥(殘血會莫名出現一次脫戰判定, 需要加血量下去判斷才不會誤判)
+                ShowTipD("●[Action] - " A_ThisFunc ", blood: " GetMemoryHack().getMainTargetBlood() ", isNotBattle: " BnsIsLeaveBattle())    
+                if(BnsIsLeaveBattle() == 1 && (GetMemoryHack().getMainTargetBlood() < 1 || GetMemoryHack().getMainTargetBlood() >= 6615000)) {
+                    return 1
+                }
+
+                return 0
+        }
     }
 
+
+
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 戰鬥中迴避卡點
+    ;* @return - none
+    ;------------------------------------------------------------------------------------------------------------
+    
 
 
 ;================================================================================================================

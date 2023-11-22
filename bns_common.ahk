@@ -992,7 +992,7 @@ BnsSelectCharacter(index) {
     sleep 200
     
     MouseMove, WIN_CENTER_X, WIN_CENTER_Y
-    sleep 1000
+    sleep 3000
     
     Send {Enter}
     sleep 1000
@@ -1205,9 +1205,9 @@ BnsIsBossDetected() {    ;主要Boss - 紅色
     ;ShowTipD("[System] - BnsIsBossDetected sx:" sx + width * 0.7 ", sy:" sy ", ex:"  sx + width ", ey:" sy + height)
 
     isCheck1 := FindPixelRGB(sx, sy, sx + width, sy + height, 0xF0F0F0, 0x08)
-    isCheck2 := FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0xF2DA8A, 0x08)
+    isCheck2 := FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0xF2DA8A, 0x10)
+    isCheck2 := isCheck2 | FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0xDBB968, 0x10)
 
-    
     if(isCheck1 == 1 && isCheck2 == 1) {
         ret:=1
         
@@ -1234,9 +1234,9 @@ BnsIsZakoDetected() {    ;副Boss - 藍色
 
     isCheck1 := FindPixelRGB(sx, sy, sx + width, sy + height, 0xF0F0F0, 0x08)    ;高亮等級(比玩家等級高)
     isCheck2 := FindPixelRGB(sx, sy, sx + width, sy + height, 0xA9A9A9, 0x08)     ;低亮等級(比玩家等級低)
-    isCheck3 := FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0x828D9C, 0x08)
-    
-    if((isCheck1 == 1 || isCheck2 == 1 )&& isCheck3 == 1) {
+    isCheck3 := FindPixelRGB(sx + width * 0.7, sy, sx + width, sy + height, 0x828D9C, 0x10)
+
+    if((isCheck1 == 1 || isCheck2 == 1 ) && isCheck3 == 1) {
         ret:=1
 
         if(DBUG == 1) {
@@ -1254,7 +1254,7 @@ BnsIsZakoDetected() {    ;副Boss - 藍色
 ;================================================================================================================
 ;阻塞式API [ retain ] 丟失目標容許時間(ms);  [ timeout ] 總戰鬥超時(s);  [ fnAction ] 重複性動作(cb);  [ fnEscape ] 脫離戰鬥條件(cb);
 BnsIsEnemyClear(retain, timeout, fnAction := 0, fnEscape := 0) {
-   return BnsIsEnemyClearCount(retain, timeout, fnAction, fnEscape)
+    return BnsIsEnemyClearCount(retain, timeout, fnAction, fnEscape)
 }
 
 ;阻塞式API [ retain ] 丟失目標容許時間(ms);  [ timeout ] 總戰鬥超時(s);  [ fnAction ] 重複性動作(cb);  [ fnEscape ] 脫離戰鬥條件(cb);
@@ -1369,7 +1369,11 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
 
             if(fnEscape) {    ;如果 fnEscape != null
                 ret := fnEscape.call()
-                
+
+                if(DBUG >=1) {
+                    ShowTipD("●[Debug] - BnsIsEnemyClearCount - escape: " ret)
+                }
+
                 if(ret != 0) {    ;達成脫離條件
                     return ret
                 }
@@ -1381,7 +1385,11 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
             }
 
             if(fnAction) {    ;如果 fnAction != null
-                fnAction.call()
+                ret := fnAction.call()
+
+                if(DBUG >=1) {
+                    ShowTipD("●[Debug] - BnsIsEnemyClearCount - exec action,  : " ret)
+                }
             }
 
 
@@ -1422,10 +1430,10 @@ BnsIsEnemyClearCount(retain, timeout, fnAction := 0, fnEscape := 0) {    ;沒有
 ;================================================================================================================
 ;是否為脫戰狀態; [ maxTime ] 最大判定時間 ms;  [ return ] 0:戰鬥狀態; 1:脫戰狀態
 BnsIsLeaveBattle(maxTime := 1) {    ;ms
-    return (GetMemoryHack().isMemHackWork() == 1) ? !GetMemoryHack().isInBattling() : BnsIsLeaveBattleLegcy(maxTime)
+    return (GetMemoryHack().isMemHackWork() == 1) ? !GetMemoryHack().isInBattling() : BnsIsLeaveBattleLegacy(maxTime)
 }
 
-BnsIsLeaveBattleLegcy(maxTime) {    ;ms
+BnsIsLeaveBattleLegacy(maxTime) {    ;ms
     ret := 0
 
     regions := StrSplit(STAMINA_INDICATOR_REGION, ",", "`r`n")

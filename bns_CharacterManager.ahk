@@ -51,6 +51,10 @@ BnsCcInit() {
 ;    Method - Load Character Profiles
 ;================================================================================================================
 BnsCcLoadCharProfiles(path) {
+    if(path == "") {
+        PROFILES_ITERATOR := -1
+        return 0
+    }
 
     charProfiles := FileOpen(path,"r", "UTF-8-RAW")
 
@@ -66,7 +70,10 @@ BnsCcLoadCharProfiles(path) {
     charProfiles.close()
 
     if(CHARACTER_PROFILES.length() > 0) {
-        PROFILES_ITERATOR := 1
+        PROFILES_ITERATOR := 1  ;cp檔中有設定
+    }
+    else {
+        PROFILES_ITERATOR := -1 ;cp檔中沒有設定
     }
 
     return CHARACTER_PROFILES.length()
@@ -209,10 +216,10 @@ BnsCcIsMissionAccept(profile) {
 
 
 ;================================================================================================================
-;    Method - Is High Speed Role
+;    Method - Get Mission Loop Times
 ;================================================================================================================
-BnsCcGetLeaveBattleTime(profile:="") {
-    t := 5000
+BnsCcGetMissionTimes(profile:="") {
+    t := 0
     if(profile == "") {
         t := StrCfgTrim(currProfile[5])
     }
@@ -221,8 +228,8 @@ BnsCcGetLeaveBattleTime(profile:="") {
         t := StrCfgTrim(p[5])
     }
 
-    if(t == 0) {
-        return 8000 ;default 6s
+    if(t == 0 || t == "") {
+        t := 2147483647     ;不限制
     }
 
     return t
@@ -258,25 +265,35 @@ BnsCcIsHighSpeed(profile:="") {
 ;    Method - Is Profile Loaded
 ;================================================================================================================
 BnsCcIsProfileLoaded() {
-    if(PROFILES_ITERATOR == 0 && CHARACTER_PROFILES.length() == 0) {
-        return 0
-    }
+    ret := (PROFILES_ITERATOR != 0) ? 1 : 0
+    
+    DumpLogD("[BnsCcIsProfileLoaded] status = " ret)
 
-    return 1
+    return ret
 }
 
 
 
 ;================================================================================================================
-;    Method - Is Profile Loaded
+;    Method - Is Profile EOF
 ;================================================================================================================
 BnsCcIsProfilesEOF() {
-    ret := 0
-    if(PROFILES_ITERATOR < 1) {
-        ret := 1
-    }
-    
+    ret := (PROFILES_ITERATOR == -1) ? 1 : 0    ;out of bound will set as -1
+
     DumpLogD("[BnsCcIsProfilesEOF] EOF = " ret)
-    
+
+    return ret
+}
+
+
+
+;================================================================================================================
+;    Method - Is Profiles Valid
+;================================================================================================================
+BnsCcIsProfilesValid() {
+    ret := (PROFILES_ITERATOR == -1 && CHARACTER_PROFILES.length() == 0) ? 0 : 1
+
+    DumpLogD("[BnsCcIsProfilesValid] valid = " ret)
+
     return ret
 }

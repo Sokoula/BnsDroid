@@ -88,7 +88,12 @@ BnsDroidMission_SI_AutoFighting(){
     sleep 1000
 
     ;等待脫戰
-    BnsIsLeaveBattle(BnsCcGetLeaveBattleTime(""))
+    loop {
+        if(BnsIsLeaveBattle()) {
+            break
+        }
+        sleep 100
+    }
 
     ShowTipI("●[Mission] - Zako clear!")
 
@@ -119,7 +124,12 @@ BnsDroidMission_SI_AutoFighting(){
     ShowTipI("●[Mission] - Boss clear!")
 
     ;等待脫戰
-    BnsIsLeaveBattle(BnsCcGetLeaveBattleTime(""))
+    loop {
+        if(BnsIsLeaveBattle()) {
+            break
+        }
+        sleep 100
+    }
 
     ShowTipI("●[Mission] - Disengage!")
 

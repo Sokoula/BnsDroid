@@ -34,33 +34,39 @@ BnsDroidRun_CelestialBasinKeys() {
 ;================================================================================================================
 BnsMoveDungeon_CelestialBasinKeys() {
     ShowTipI("●[System] - Move to treasure room")
-    BnsActionAdjustDirectionOnMap(2)
-    sleep 200
-    BnsActionWalk(950)
+    ; BnsActionAdjustDirectionOnMap(2)
+    ; sleep 200
+    ; BnsActionWalk(950)
     ;BnsMoveDungeon_RandomConfuseProtection(1100)
     ;BnsMoveDungeon_RandomConfuseProtection(4300)
-    sleep 200
+    ; sleep 200
+    
+    BnsActionSprintToPosition(46740, -57730)
+    sleep 1000
 
-    ;點擊傳點5次，防止別人佔用
-    loop, 10 {
-        if(FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 24, "res\pic_dungeon_option") == 1) {
-            loop, 3 {
-                Send, {f}
-                sleep 100
-            }
 
-            sleep 4300
+    ; if(BnsIsAvailableTalk() != 0) {
+        ;點擊傳點5次，防止別人佔用
+        loop, 10 {
+            if(FindPicList(0, 0, WIN_WIDTH, WIN_HEIGHT, 24, "res\pic_dungeon_option") == 1) {
+                loop, 3 {
+                    ControlSend,,{f}, %res_game_window_title%
+                    sleep 100
+                }
 
-            if(BnsIsMapLoading() == 1) {
-                ShowTipI("●[System] - Enter into treasure room")
-                if(BnsWaitMapLoadDone() == 1) {
-                    return 1
+                sleep 4300
+
+                if(BnsIsMapLoading() == 1) {
+                    ShowTipI("●[System] - Enter into treasure room")
+                    if(BnsWaitMapLoadDone() == 1) {
+                        return 1
+                    }
                 }
             }
-        }
 
-        sleep 5000
-    }
+            sleep 5000
+        }
+    ; }
 
     BnsDroidMission_CB_Fail("the entry does not find")
     
@@ -92,6 +98,28 @@ CB_TIMEOIT_NOTIFY_THREAD() {
 ;================================================================================================================
 ;################################################################################################################
 BnsDroidMission_CB_HuntKey(){
+    ShowTipI("●[Mission1] - Engage")
+    BnsStartHackSpeed()
+    BnsActionWalkToPosition(-13500, -89075)
+
+    ShowTipI("●[Mission1] - Fighting")
+    BnsStartAutoCombat()
+    sleep 5000
+
+    ShowTipI("●[Mission1] - Mission Completed")
+    BnsStopAutoCombat()
+
+    ShowTipI("●[Mission1] - Exit the treasure room")
+    BnsActionWalkToPosition(-13500, -89075)
+    BnsActionWalkToPosition(-14700, -88200)
+
+    BnsStopHackSpeed()
+    sleep 500
+    BnsWaitMapLoadDone()
+}
+
+
+BnsDroidMission_CB_HuntKeyLegacy(){
     ShowTipI("●[Mission1] - Engage")
     ;BnsStartHackSpeed()
     sleep 500

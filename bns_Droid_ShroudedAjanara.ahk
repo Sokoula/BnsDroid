@@ -22,6 +22,10 @@ Class BnsDroidShroudedAjanara {
 ;================================================================================================================
 ;█ VariablesAVOID_
 ;===========AVOID_=====================================================================================================
+    ;入門千手卡片
+    EASY_CARD_X := 850
+    EASY_CARD_Y := 580
+
     ;一般千手卡片
     NORMAL_CARD_X := 970
     NORMAL_CARD_Y := 580
@@ -74,8 +78,7 @@ Class BnsDroidShroudedAjanara {
     ;------------------------------------------------------------------------------------------------------------
     ;讀取與 CP 檔; [ return ] 回傳 cp 檔名
     getCharacterProfiles() {
-        ; return "SuspiciousSkyIsland.cp"
-        return ""
+        return "ShroudedAjanara.cp"
     }
 
 
@@ -88,17 +91,24 @@ Class BnsDroidShroudedAjanara {
 
         if(dist > 1421) {   ;1421 已經在千手場上
             if(dist < 5424 ) {
-                BnsActionWalkToPosition(this.LOAD_POX_X, this.LOAD_POX_Y)
+                BnsActionSprintToPosition(this.LOAD_POX_X, this.LOAD_POX_Y)
             }
 
             BnsActionWalkToPosition(this.ENTERY_POS_X, this.ENTERY_POS_Y)
-            sleep 1000
+            sleep 2000
+            ; BnsActionWalkToPosition(this.ENTERY_POS_X, this.ENTERY_POS_Y)
             ; loop 3 {
                 Send {f}
             ;     sleep 200
             ; }
             sleep 1000
-            MouseClick left, this.NORMAL_CARD_X, this.NORMAL_CARD_Y
+            switch PARTY_MODE {
+                case 1:
+                    MouseClick left, this.EASY_CARD_X, this.EASY_CARD_Y
+                case 2:
+                    MouseClick left, this.NORMAL_CARD_X, this.NORMAL_CARD_Y
+                case 3:
+            }
             sleep 4000
             BnsWaitMapLoadDone()
             sleep 1000
@@ -113,7 +123,17 @@ Class BnsDroidShroudedAjanara {
     ;Droid script stat; @return - 1: success; 0: failed
     start() {
         ; this.isStageSpecialDone := 0    ;重置特殊機制 flag
-        return this.runnable()
+        switch PARTY_MODE {
+            case 1:
+                return this.runnableEasy()
+
+            case 2:
+                return this.runnableNormal()
+
+            case 3:
+        }
+
+        
     }
 
 
@@ -132,7 +152,37 @@ Class BnsDroidShroudedAjanara {
     ;■ 腳本 ****
     ;------------------------------------------------------------------------------------------------------------
     ;Script runnable for specific; @return - 1: success; 0: failed
-    runnable() {
+    runnableEasy() {
+        BnsStartHackSpeed()
+        loop {
+            ShowTipI("●[Mission] - 開始戰鬥")
+            BnsActionWalkToPosition(this.BAIT_POS_X, this.BAIT_POS_Y,,5000)
+            BnsStartAutoCombat()
+            
+            sleep 500
+
+            if(this.runStageFinished() == 1) {
+                sleep 3000  ;預留撿箱時間
+                BnsStopAutoCombat()
+                BnsStopHackSpeed()
+                ShowTipI("●[Mission] - 任務達成")
+                break
+            }
+            else {
+                ShowTipI("●[Mission] - 角色死亡, 40% 應對失敗")
+                this.resurrection()
+                continue
+            }
+        }
+        BnsStopHackSpeed()
+        return 1
+    }
+
+    ;------------------------------------------------------------------------------------------------------------
+    ;■ 腳本 ****
+    ;------------------------------------------------------------------------------------------------------------
+    ;Script runnable for specific; @return - 1: success; 0: failed
+    runnableNormal() {
 
         loop {
 
