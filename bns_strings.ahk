@@ -21,5 +21,16 @@ global res_sys_f8_unicom_dungeon_card_title := "統合副本"
 ;=====================================================
 ; F8 Lobby UI
 ;=====================================================
-global res_lobby_btn_member_ready := "參加準備"
-global res_lobby_btn_member_cancel := "取消準備"
+global res_lobby_btn_member_ready           := "參加準備"
+global res_lobby_btn_member_cancel          := "取消準備"
+global res_lobby_labal_party_setting        := ".伍設定"
+global res_lobby_labal_level_select         := "段位.擇"
+global res_lobby_label_tab_dungeon          := "副本"
+
+
+
+
+;=====================================================
+; F8 Lobby UI
+;=====================================================
+global res_dungeon_chaos_block_shenmu_boss_name     := "阿索樂"
